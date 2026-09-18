@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mô Hình 3D Nhà Phố 3 Tầng + Sân Thượng (39.4m²)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg-dark: #0f172a;
+      --surface: rgba(15, 23, 42, 0.88);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #f59e0b;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      overflow: hidden;
+      background-color: #0b0f19;
+      color: var(--text);
+    }
+
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* UI Overlay */
+    .ui-layer {
+      position: absolute;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .ui-layer * {
+      pointer-events: auto;
+    }
+
+    /* Header */
+    .header-panel {
+      top: 20px;
+      left: 20px;
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 16px 22px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+      max-width: 420px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-badge {
+      font-size: 11px;
+      background: rgba(37, 99, 235, 0.25);
+      color: #60a5fa;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
+    .header-subtitle {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat-item {
+      flex: 1;
+    }
+
+    .stat-label {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .stat-val {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-top: 2px;
+    }
+
+    /* Navigation toolbar */
+    .toolbar-bottom {
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .nav-btn.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .divider {
+      width: 1px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.12);
+      margin: 0 4px;
+    }
+
+    /* Right floating control panel */
+    .controls-right {
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-tool {
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 16px;
+      width: 250px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    }
+
+    .card-tool-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      font-size: 12.5px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .btn-mini {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #cbd5e1;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-mini:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    /* Floor detail tooltip */
+    .info-box {
+      bottom: 84px;
+      left: 20px;
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 14px 18px;
+      border-radius: 14px;
+      max-width: 360px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      transition: all 0.3s ease;
+    }
+
+    .info-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 6px;
+    }
+
+    .info-desc {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    /* Help floating icon */
+    .help-hint {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      color: var(--text-muted);
+      font-size: 11px;
+      background: rgba(15,23,42,0.7);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      pointer-events: none;
+    }
+
+    @media (max-width: 860px) {
+      .header-panel { max-width: calc(100vw - 40px); }
+      .controls-right { display: none; }
+      .toolbar-bottom { width: 92%; overflow-x: auto; justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+
+  <!-- Header Info -->
+  <div class="ui-layer header-panel">
+    <div class="header-title">
+      Thiết Kế 3D Nhà Phố 3 Tầng + Sân Thượng
+      <span class="header-badge">39.4 m²</span>
+    </div>
+    <div class="header-subtitle">
+      Thửa 22, Tờ 31, P. Bình Phú (P.11 cũ), Quận 6, TP.HCM
+      <br>Hẻm 4m thông ra Đ. Hậu Giang
+    </div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-label">Quy mô</div>
+        <div class="stat-val">1 Trệt, 2 Lầu, 1 Tum</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Chiều sâu</div>
+        <div class="stat-val">10.53 m</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Bề ngang</div>
+        <div class="stat-val">~3.45 m</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Tổng chiều cao</div>
+        <div class="stat-val">~15.5 m (4m/tầng)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Floating Utilities -->
+  <div class="ui-layer controls-right">
+    <div class="card-tool">
+      <div class="card-tool-title">Góc Nhìn Camera</div>
+      <div class="btn-grid">
+        <button class="btn-mini" onclick="setCameraView('front')">Mặt Tiền Hẻm</button>
+        <button class="btn-mini" onclick="setCameraView('door')">Cửa Trệt Góc Xéo</button>
+        <button class="btn-mini" onclick="setCameraView('stair')">Cầu Thang Ngang</button>
+        <button class="btn-mini" onclick="setCameraView('hallway')">Hành Lang 0.86m</button>
+        <button class="btn-mini" onclick="setCameraView('wc')">Toilet Tầng Trệt</button>
+        <button class="btn-mini" onclick="setCameraView('backdoor')">Cửa Ra Sau</button>
+        <button class="btn-mini" onclick="setCameraView('top')">Mặt Bằng Từ Trên</button>
+      </div>
+    </div>
+
+    <div class="card-tool">
+      <div class="card-tool-title">Tùy Chọn Hiển Thị</div>
+      <div class="toggle-row">
+        <span>Bật/Tắt Nội Thất</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-furniture" checked onchange="toggleFurniture(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>Nhìn Xuyên Tường (X-Ray)</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-xray" onchange="toggleXRay(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>Chế Độ Ánh Sáng Ban Đêm</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-night" onchange="toggleNightMode(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span>Tự Động Xoay (Auto Rotate)</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-rotate" onchange="toggleAutoRotate(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floor Information Tooltip -->
+  <div class="ui-layer info-box" id="info-box">
+    <div class="info-title" id="info-title">Toàn Cảnh Tổng Thể</div>
+    <div class="info-desc" id="info-desc">
+      Kiến trúc Hiện đại nhiệt đới với hệ lam gỗ composite chống nắng hướng Tây, ban công xanh và giàn pergola sân thượng thoáng mát.
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="ui-layer toolbar-bottom">
+    <button class="nav-btn active" id="btn-all" onclick="selectFloor('all')">
+      🏢 Toàn Cảnh
+    </button>
+    <button class="nav-btn" id="btn-explode" onclick="selectFloor('explode')">
+      📂 Bóc Tách Tầng
+    </button>
+    <div class="divider"></div>
+    <button class="nav-btn" id="btn-f0" onclick="selectFloor(0)">
+      1️⃣ Tầng Trệt
+    </button>
+    <button class="nav-btn" id="btn-f1" onclick="selectFloor(1)">
+      2️⃣ Lầu 1
+    </button>
+    <button class="nav-btn" id="btn-f2" onclick="selectFloor(2)">
+      3️⃣ Lầu 2
+    </button>
+    <button class="nav-btn" id="btn-f3" onclick="selectFloor(3)">
+      🌿 Sân Thượng
+    </button>
+  </div>
+
+  <div class="help-hint">
+    Chuột trái: Xoay 360° | Chuột phải: Di chuyển | Cuộn chuột: Thu phóng
+  </div>
+
+  <script>
+    // --- KHỞI TẠO THREE.JS SCENE ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c1322);
+    scene.fog = new THREE.FogExp2(0x0c1322, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(-16, 12, 22);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
+    controls.target.set(0, 6, 0);
+
+    // --- ÁNH SÁNG (LIGHTS) ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xddeeff, 0x223344, 0.4);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff7ed, 1.4);
+    sunLight.position.set(-18, 30, 20);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 80;
+    const d = 20;
+    sunLight.shadow.camera.left = -d;
+    sunLight.shadow.camera.right = d;
+    sunLight.shadow.camera.top = d;
+    sunLight.shadow.camera.bottom = -d;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    // Đèn nội thất ấm ban đêm
+    const warmPointLights = [];
+    function createWarmLight(x, y, z, intensity = 1.2, dist = 7) {
+      const pLight = new THREE.PointLight(0xffaa44, 0, dist);
+      pLight.position.set(x, y, z);
+      scene.add(pLight);
+      warmPointLights.push({ light: pLight, targetIntensity: intensity });
+      return pLight;
+    }
+
+    // --- VẬT LIỆU (MATERIALS) ---
+    const matWallWhite = new THREE.MeshStandardMaterial({ color: 0xf3f4f6, roughness: 0.5 });
+    const matWallAccent = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const matWood = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.4, metalness: 0.1 });
+    const matWoodDark = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.45 });
+    const matFloorTile = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
+    const matFloorBed = new THREE.MeshStandardMaterial({ color: 0xc28e5c, roughness: 0.4 });
+    const matGlass = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.35,
+      roughness: 0.1,
+      metalness: 0.1,
+      transmission: 0.85,
+      ior: 1.5
+    });
+    const matGlassRailing = new THREE.MeshPhysicalMaterial({
+      color: 0x93c5fd,
+      transparent: true,
+      opacity: 0.45,
+      roughness: 0.1,
+      transmission: 0.8
+    });
+    const matMetalBlack = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.8 });
+    const matGreen = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.6 });
+    const matRoad = new THREE.MeshStandardMaterial({ color: 0x1e222d, roughness: 0.9 });
+    const matPavement = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.7 });
+
+    // --- MẶT ĐẤT VÀ HẺM 4M ---
+    const groundGeo = new THREE.PlaneGeometry(60, 60);
+    const ground = new THREE.Mesh(groundGeo, matRoad);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.02;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Kẻ vạch và vỉa hè / hẻm ximăng
+    const alleyGeo = new THREE.BoxGeometry(7, 0.1, 30);
+    const alley = new THREE.Mesh(alleyGeo, matPavement);
+    alley.position.set(-5.5, 0.05, 0);
+    alley.receiveShadow = true;
+    scene.add(alley);
+
+    // Ranh đất vẽ đường nét đứt
+    const plotShape = new THREE.Shape();
+    // Kích thước chuẩn: Rộng 3.45m, Dài 10.5m. Góc vát mặt tiền hẻm
+    const W = 3.45;
+    const L = 10.53;
+    const X0 = -W/2, X1 = W/2;
+    const Z0 = -L/2, Z1 = L/2;
+    
+    const pts = [
+      new THREE.Vector2(X0, Z0),
+      new THREE.Vector2(X1, Z0),
+      new THREE.Vector2(X1, Z1),
+      new THREE.Vector2(0.2, Z1),
+      new THREE.Vector2(X0, Z1 - 2.2),
+      new THREE.Vector2(X0, Z0)
+    ];
+    plotShape.moveTo(pts[0].x, pts[0].y);
+    for(let i=1; i<pts.length; i++) plotShape.lineTo(pts[i].x, pts[i].y);
+
+    const plotLineGeo = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p.x, 0.12, p.y)));
+    const plotLine = new THREE.Line(plotLineGeo, new THREE.LineDashedMaterial({ color: 0xf59e0b, dashSize: 0.4, gapSize: 0.2 }));
+    plotLine.computeLineDistances();
+    scene.add(plotLine);
+
+    // --- CÁC TẦNG NHÀ (FLOOR GROUPS) ---
+    const buildingGroup = new THREE.Group();
+    scene.add(buildingGroup);
+
+    const floorGroups = [];
+    const floorHeights = [4.0, 4.0, 4.0, 3.5];
+    const floorBaseY = [0, 4.0, 8.0, 12.0];
+    const furnitureList = [];
+
+    // Helper hàm tạo sàn / trần hình đa giác đất
+    function createFloorSlab(y, thickness = 0.25, material = matFloorTile) {
+      const extrudeSettings = { depth: thickness, bevelEnabled: false };
+      const slabGeo = new THREE.ExtrudeGeometry(plotShape, extrudeSettings);
+      slabGeo.rotateX(Math.PI / 2);
+      const slab = new THREE.Mesh(slabGeo, material);
+      slab.position.y = y + thickness;
+      slab.receiveShadow = true;
+      slab.castShadow = true;
+      return slab;
+    }
+
+    // Helper tạo tường bao
+    function createWall(w, h, d, x, y, z, mat = matWallWhite) {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y + h/2, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+
+    // Helper tạo lam gỗ chắn nắng
+    function createLouvers(w, h, count, x, y, z, rotY = 0) {
+      const group = new THREE.Group();
+      const louverH = 0.08;
+      const step = h / count;
+      for (let i = 0; i < count; i++) {
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, louverH, 0.04), matWood);
+        mesh.position.set(0, i * step + step/2, 0);
+        mesh.castShadow = true;
+        group.add(mesh);
+      }
+      group.position.set(x, y, z);
+      group.rotation.y = rotY;
+      return group;
+    }
+
+    // Helper tạo chậu hoa ban công cây xanh
+    function createPlanter(w, x, y, z) {
+      const group = new THREE.Group();
+      const box = new THREE.Mesh(new THREE.BoxGeometry(w, 0.45, 0.35), matWallAccent);
+      box.position.set(0, 0.22, 0);
+      group.add(box);
+      // Lá cây xanh
+      for (let i = 0; i < 6; i++) {
+        const plant = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), matGreen);
+        plant.scale.set(1.2, 0.8, 1);
+        plant.position.set(-w/2 + 0.2 + (i * (w - 0.4)/5), 0.45, (Math.random() - 0.5) * 0.15);
+        group.add(plant);
+      }
+      group.position.set(x, y, z);
+      return group;
+    }
+
+    // ==========================================
+    // 1. TẦNG TRỆT (GROUND FLOOR) - Y: 0 -> 4.0m
+    // ==========================================
+    const gFloor = new THREE.Group();
+    buildingGroup.add(gFloor);
+    floorGroups.push(gFloor);
+
+    // Nền tầng trệt
+    gFloor.add(createFloorSlab(0, 0.2, matFloorTile));
+
+    // Tường hông phải (đặc) - Chiều cao 4.0m
+    gFloor.add(createWall(0.2, 4.0, L, X1 - 0.1, 0, 0));
+    // Tường sau tầng trệt: Bố trí cửa đi ra sau nhà (ngang 1.08m, cao 2.15m) thẳng lối hành lang
+    const rearDoorW = 1.08;
+    const rearDoorH = 2.15;
+    const rearCornerPierW = 0.12; // Trụ góc hông trái
+    const rearDoorMidX = X0 + rearCornerPierW + rearDoorW / 2; // -1.065m (thẳng lối đi hành lang)
+    const rearSolidWallW = W - rearCornerPierW - rearDoorW; // 2.25m (đoạn tường sau toilet và sảnh)
+    const rearSolidWallMidX = X1 - rearSolidWallW / 2; // 0.60m
+
+    // Trụ góc tường trái
+    gFloor.add(createWall(rearCornerPierW, 4.0, 0.2, X0 + rearCornerPierW / 2, 0, Z0 + 0.1));
+    // Đoạn tường đặc bên phải (sau toilet và sảnh)
+    gFloor.add(createWall(rearSolidWallW, 4.0, 0.2, rearSolidWallMidX, 0, Z0 + 0.1));
+    // Lanh tô bê tông tường trên cửa sau (từ 2.15m lên trần 4.0m, cao 1.85m)
+    const rearLintelH = 4.0 - rearDoorH;
+    const rearLintel = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW, rearLintelH, 0.2), matWallWhite);
+    rearLintel.position.set(rearDoorMidX, rearDoorH + rearLintelH / 2, Z0 + 0.1);
+    gFloor.add(rearLintel);
+
+    // BỘ CỬA NHÔM XINGFA ĐI RA SAU NHÀ (NGANG 1.08M, CAO 2.15M)
+    const rearDoorGroup = new THREE.Group();
+    // Khung bao nhôm Xingfa
+    const rDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW, rearDoorH, 0.08), matMetalBlack);
+    rDoorFrame.position.set(0, rearDoorH / 2, 0);
+    // Cánh cửa kính nhôm Xingfa an toàn (hơi hé mở để thể hiện lối đi ra sau)
+    const rDoorLeaf = new THREE.Group();
+    const rLeafFrame = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW - 0.08, rearDoorH - 0.08, 0.045), matMetalBlack);
+    rLeafFrame.position.set(0, (rearDoorH - 0.08) / 2, 0);
+    const rLeafGlass = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW - 0.24, rearDoorH - 0.24, 0.015), matGlass);
+    rLeafGlass.position.set(0, (rearDoorH - 0.08) / 2, 0);
+    const rHandle = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.25, 0.08), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+    rHandle.position.set((rearDoorW - 0.08)/2 - 0.06, 1.0, 0.04);
+    rDoorLeaf.add(rLeafFrame, rLeafGlass, rHandle);
+    rDoorLeaf.position.set(0, 0.04, 0);
+    // Cánh cửa mở hé nhẹ 25 độ ra phía sau
+    rDoorLeaf.rotation.y = 0.45;
+    rearDoorGroup.add(rDoorFrame, rDoorLeaf);
+    rearDoorGroup.position.set(rearDoorMidX, 0, Z0 + 0.1);
+    gFloor.add(rearDoorGroup);
+    // Tường hông trái - Chiều cao 4.0m
+    gFloor.add(createWall(0.2, 4.0, L - 2.2, X0 + 0.1, 0, Z0 + (L - 2.2)/2));
+
+    // Helper tạo tay nắm cửa inox hiện đại
+    function createDoorHandle() {
+      const hGroup = new THREE.Group();
+      const matHandle = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 });
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.75, 16), matHandle);
+      bar.position.set(0, 0, 0.03);
+      const m1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.03, 12), matHandle);
+      m1.rotation.x = Math.PI / 2;
+      m1.position.set(0, 0.25, 0.015);
+      const m2 = m1.clone();
+      m2.position.set(0, -0.25, 0.015);
+      hGroup.add(bar, m1, m2);
+      return hGroup;
+    }
+
+    // Helper tạo hệ cửa nhôm kính 4 cánh kèm ô fix bên trên chuẩn hiện đại
+    function createModern4PanelGlassDoor(totalW, totalH, transomH) {
+      const doorGroup = new THREE.Group();
+      const frameThick = 0.06;
+      const frameDepth = 0.08;
+      const leafCount = 4;
+      const panelH = totalH - transomH;
+
+      // 1. Khung bao ngoại vi
+      const jambL = new THREE.Mesh(new THREE.BoxGeometry(frameThick, totalH, frameDepth), matMetalBlack);
+      jambL.position.set(-totalW/2 + frameThick/2, totalH/2, 0);
+      const jambR = new THREE.Mesh(new THREE.BoxGeometry(frameThick, totalH, frameDepth), matMetalBlack);
+      jambR.position.set(totalW/2 - frameThick/2, totalH/2, 0);
+      const headFrame = new THREE.Mesh(new THREE.BoxGeometry(totalW, frameThick, frameDepth), matMetalBlack);
+      headFrame.position.set(0, totalH - frameThick/2, 0);
+      const sillFrame = new THREE.Mesh(new THREE.BoxGeometry(totalW, 0.04, frameDepth + 0.02), matMetalBlack);
+      sillFrame.position.set(0, 0.02, 0);
+      const transomBar = new THREE.Mesh(new THREE.BoxGeometry(totalW - 2*frameThick, frameThick, frameDepth), matMetalBlack);
+      transomBar.position.set(0, panelH, 0);
+
+      doorGroup.add(jambL, jambR, headFrame, sillFrame, transomBar);
+
+      // 2. Ô fix kính phía trên chia làm 4 ô
+      const innerW = totalW - 2 * frameThick;
+      const bayW = innerW / leafCount;
+      const transomGlassH = transomH - 1.5 * frameThick;
+      const transomGlassY = panelH + frameThick/2 + transomGlassH/2;
+
+      for (let i = 0; i < leafCount; i++) {
+        const xPos = -innerW/2 + (i + 0.5) * bayW;
+        const tGlass = new THREE.Mesh(new THREE.BoxGeometry(bayW - 0.03, transomGlassH, 0.015), matGlass);
+        tGlass.position.set(xPos, transomGlassY, 0);
+        doorGroup.add(tGlass);
+
+        if (i > 0) {
+          const tMullion = new THREE.Mesh(new THREE.BoxGeometry(0.04, transomGlassH, frameDepth * 0.85), matMetalBlack);
+          tMullion.position.set(-innerW/2 + i * bayW, transomGlassY, 0);
+          doorGroup.add(tMullion);
+        }
+      }
+
+      // 3. 4 Cánh cửa kính có đố bao quanh
+      const leafW = innerW / leafCount;
+      const leafH = panelH - 0.04 - frameThick/2;
+      const leafThick = 0.045;
+      const leafProfileW = 0.07;
+
+      for (let i = 0; i < leafCount; i++) {
+        const leafGroup = new THREE.Group();
+        const leafCenterX = -innerW/2 + (i + 0.5) * leafW;
+
+        const lStileL = new THREE.Mesh(new THREE.BoxGeometry(leafProfileW, leafH, leafThick), matMetalBlack);
+        lStileL.position.set(-leafW/2 + leafProfileW/2, leafH/2, 0);
+        const lStileR = new THREE.Mesh(new THREE.BoxGeometry(leafProfileW, leafH, leafThick), matMetalBlack);
+        lStileR.position.set(leafW/2 - leafProfileW/2, leafH/2, 0);
+
+        const lRailTop = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafProfileW, leafThick), matMetalBlack);
+        lRailTop.position.set(0, leafH - leafProfileW/2, 0);
+        const lRailBottom = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafProfileW * 1.5, leafThick), matMetalBlack);
+        lRailBottom.position.set(0, leafProfileW * 0.75, 0);
+
+        const glassW = leafW - 2 * leafProfileW + 0.01;
+        const glassH = leafH - 2.5 * leafProfileW + 0.01;
+        const lGlass = new THREE.Mesh(new THREE.BoxGeometry(glassW, glassH, 0.012), matGlass);
+        lGlass.position.set(0, leafH/2 - leafProfileW * 0.25, 0);
+
+        leafGroup.add(lStileL, lStileR, lRailTop, lRailBottom, lGlass);
+
+        // Tay nắm cửa inox đứng ở 2 cánh giữa
+        if (i === 1) {
+          const handle = createDoorHandle();
+          handle.position.set(leafW/2 - leafProfileW - 0.02, 1.05, leafThick/2 + 0.01);
+          leafGroup.add(handle);
+        } else if (i === 2) {
+          const handle = createDoorHandle();
+          handle.position.set(-leafW/2 + leafProfileW + 0.02, 1.05, leafThick/2 + 0.01);
+          leafGroup.add(handle);
+        }
+
+        leafGroup.position.set(leafCenterX, 0.04, 0);
+        doorGroup.add(leafGroup);
+      }
+
+      return doorGroup;
+    }
+
+    // Helper tạo cửa sổ nhôm kính Xingfa 4 cánh kèm ô fix và nan hoa đồng (Theo ảnh gia chủ cung cấp)
+    function createXingfa4PanelWindow(totalW, totalH, transomH) {
+      const winGroup = new THREE.Group();
+      const frameThick = 0.055;
+      const frameDepth = 0.07;
+      const leafCount = 4;
+      const panelH = totalH - transomH;
+
+      const matGoldGrid = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.85, roughness: 0.25 });
+      const matCurtain = new THREE.MeshStandardMaterial({ color: 0xf8fafc, transparent: true, opacity: 0.65, roughness: 0.9 });
+
+      // 1. Khung bao chính
+      const jambL = new THREE.Mesh(new THREE.BoxGeometry(frameThick, totalH, frameDepth), matMetalBlack);
+      jambL.position.set(-totalW/2 + frameThick/2, totalH/2, 0);
+      const jambR = new THREE.Mesh(new THREE.BoxGeometry(frameThick, totalH, frameDepth), matMetalBlack);
+      jambR.position.set(totalW/2 - frameThick/2, totalH/2, 0);
+      const headFrame = new THREE.Mesh(new THREE.BoxGeometry(totalW, frameThick, frameDepth), matMetalBlack);
+      headFrame.position.set(0, totalH - frameThick/2, 0);
+      const sillFrame = new THREE.Mesh(new THREE.BoxGeometry(totalW, frameThick, frameDepth + 0.03), matMetalBlack);
+      sillFrame.position.set(0, frameThick/2, 0);
+      const transomBar = new THREE.Mesh(new THREE.BoxGeometry(totalW - 2*frameThick, frameThick, frameDepth), matMetalBlack);
+      transomBar.position.set(0, panelH, 0);
+
+      winGroup.add(jambL, jambR, headFrame, sillFrame, transomBar);
+
+      const innerW = totalW - 2 * frameThick;
+      const bayW = innerW / leafCount;
+
+      // 2. Ô fix kính phía trên có nan hoa đồng
+      const transomGlassH = transomH - 1.5 * frameThick;
+      const transomGlassY = panelH + frameThick/2 + transomGlassH/2;
+
+      for (let i = 0; i < leafCount; i++) {
+        const xPos = -innerW/2 + (i + 0.5) * bayW;
+        const tGlass = new THREE.Mesh(new THREE.BoxGeometry(bayW - 0.025, transomGlassH, 0.015), matGlass);
+        tGlass.position.set(xPos, transomGlassY, 0);
+        winGroup.add(tGlass);
+
+        // Nan hoa đồng trang trí trong ô fix
+        const gH = new THREE.Mesh(new THREE.BoxGeometry(bayW - 0.04, 0.008, 0.008), matGoldGrid);
+        gH.position.set(xPos, transomGlassY, 0);
+        const gV = new THREE.Mesh(new THREE.BoxGeometry(0.008, transomGlassH - 0.04, 0.008), matGoldGrid);
+        gV.position.set(xPos, transomGlassY, 0);
+        winGroup.add(gH, gV);
+
+        if (i > 0) {
+          const tMullion = new THREE.Mesh(new THREE.BoxGeometry(0.035, transomGlassH, frameDepth * 0.85), matMetalBlack);
+          tMullion.position.set(-innerW/2 + i * bayW, transomGlassY, 0);
+          winGroup.add(tMullion);
+        }
+      }
+
+      // 3. 4 Cánh cửa sổ nhôm kính có nan hoa đồng chữ thập
+      const leafW = innerW / leafCount;
+      const leafH = panelH - frameThick;
+      const leafThick = 0.04;
+      const leafProfileW = 0.055;
+
+      for (let i = 0; i < leafCount; i++) {
+        const leafGroup = new THREE.Group();
+        const leafCenterX = -innerW/2 + (i + 0.5) * leafW;
+
+        const sL = new THREE.Mesh(new THREE.BoxGeometry(leafProfileW, leafH, leafThick), matMetalBlack);
+        sL.position.set(-leafW/2 + leafProfileW/2, leafH/2, 0);
+        const sR = new THREE.Mesh(new THREE.BoxGeometry(leafProfileW, leafH, leafThick), matMetalBlack);
+        sR.position.set(leafW/2 - leafProfileW/2, leafH/2, 0);
+        const rT = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafProfileW, leafThick), matMetalBlack);
+        rT.position.set(0, leafH - leafProfileW/2, 0);
+        const rB = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafProfileW, leafThick), matMetalBlack);
+        rB.position.set(0, leafProfileW/2, 0);
+
+        const glassW = leafW - 2 * leafProfileW;
+        const glassH = leafH - 2 * leafProfileW;
+        const lGlass = new THREE.Mesh(new THREE.BoxGeometry(glassW, glassH, 0.012), matGlass);
+        lGlass.position.set(0, leafH/2, 0);
+
+        // Nan trang trí hoa đồng vàng bên trong cánh
+        const gridV = new THREE.Mesh(new THREE.BoxGeometry(0.008, glassH - 0.05, 0.008), matGoldGrid);
+        gridV.position.set(0, leafH/2, 0);
+        const gridH1 = new THREE.Mesh(new THREE.BoxGeometry(glassW - 0.05, 0.008, 0.008), matGoldGrid);
+        gridH1.position.set(0, leafH/2 + glassH * 0.22, 0);
+        const gridH2 = new THREE.Mesh(new THREE.BoxGeometry(glassW - 0.05, 0.008, 0.008), matGoldGrid);
+        gridH2.position.set(0, leafH/2 - glassH * 0.22, 0);
+
+        leafGroup.add(sL, sR, rT, rB, lGlass, gridV, gridH1, gridH2);
+        leafGroup.position.set(leafCenterX, frameThick, 0);
+        winGroup.add(leafGroup);
+      }
+
+      // 4. Rèm voan trắng mềm mại bên trong phòng
+      const curtain = new THREE.Mesh(new THREE.BoxGeometry(innerW * 0.95, panelH * 0.95, 0.02), matCurtain);
+      curtain.position.set(0, panelH * 0.5, -0.08);
+      winGroup.add(curtain);
+
+      return winGroup;
+    }
+
+    // Cột góc chịu lực tại các góc mặt tiền (Chiều cao 4.0m)
+    const colC = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallAccent);
+    colC.position.set(X0 + 0.125, 2.0, Z1 - 2.2 + 0.125);
+    const colB = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallAccent);
+    colB.position.set(0.2 - 0.125, 2.0, Z1 - 0.125);
+    const colA = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallAccent);
+    colA.position.set(X1 - 0.125, 2.0, Z1 - 0.125);
+    gFloor.add(colA, colB, colC);
+
+    // Mảng tường trang trí mặt tiền đoạn thẳng (giữa điểm B: 0.2 và điểm A: X1) - Chiều cao 4.0m
+    const wallFrontStraightW = X1 - 0.2;
+    const wallFrontStraight = new THREE.Mesh(new THREE.BoxGeometry(wallFrontStraightW, 4.0, 0.2), matWallAccent);
+    wallFrontStraight.position.set((X1 + 0.2)/2, 2.0, Z1 - 0.1);
+    gFloor.add(wallFrontStraight);
+
+    // Biển số nhà & Đèn hắt tường trang trí bên cạnh cửa
+    const housePlate = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.22, 0.02), matMetalBlack);
+    housePlate.position.set((X1 + 0.2)/2, 1.9, Z1 + 0.01);
+    const wallSconce = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.08), matWoodDark);
+    wallSconce.position.set((X1 + 0.2)/2, 2.5, Z1 + 0.04);
+    gFloor.add(housePlate, wallSconce);
+
+    // CỬA CHÍNH 4 CÁNH KÍCH THƯỚC CHUẨN: NGANG 2.15M x CAO 2.36M TẠI GÓC XÉO MẶT TIỀN
+    const doorSlantW = Math.hypot(0.2 - X0, 2.2); // Chiều dài cạnh xéo ~2.92m
+    const doorAngledMidX = (0.2 + X0) / 2;
+    const doorAngledMidZ = Z1 - 1.1;
+    const doorAngledRotY = -Math.atan2(2.2, 0.2 - X0);
+
+    const frontSlantedGroup = new THREE.Group();
+    frontSlantedGroup.position.set(doorAngledMidX, 0, doorAngledMidZ);
+    frontSlantedGroup.rotation.y = doorAngledRotY;
+
+    // 1. Cửa chính 4 cánh nhôm kính Xingfa: Rộng đúng 2.15m, Cao đúng 2.36m (kèm ô fix 0.40m)
+    const mainDoorW = 2.15;
+    const mainDoorH = 2.36;
+    const mainDoorTransomH = 0.40;
+    const mainGlassDoor = createModern4PanelGlassDoor(mainDoorW, mainDoorH, mainDoorTransomH);
+    mainGlassDoor.position.set(0, 0, 0);
+    frontSlantedGroup.add(mainGlassDoor);
+
+    // 2. Hai trụ vách tường hai bên cửa bù khoảng trống mặt nghiêng 2.92m - 2.15m (mỗi bên rộng ~0.385m, cao 4.0m)
+    const sideWallW = (doorSlantW - mainDoorW) / 2;
+    const sideWallL = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), matWallAccent);
+    sideWallL.position.set(-mainDoorW/2 - sideWallW/2, 2.0, 0);
+    const sideWallR = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), matWallAccent);
+    sideWallR.position.set(mainDoorW/2 + sideWallW/2, 2.0, 0);
+    frontSlantedGroup.add(sideWallL, sideWallR);
+
+    // 3. Lanh tô bê tông phía trên cửa từ 2.36m lên chạm trần 4.0m (chiều cao 1.64m)
+    const lintelH = 4.0 - mainDoorH; // 1.64m
+    const lintelSlanted = new THREE.Mesh(new THREE.BoxGeometry(mainDoorW, lintelH, 0.2), matWallWhite);
+    lintelSlanted.position.set(0, mainDoorH + lintelH/2, 0);
+    frontSlantedGroup.add(lintelSlanted);
+
+    // 4. Bậc thềm đá hoa cương dẫn vào cửa
+    const doorStep = new THREE.Mesh(new THREE.BoxGeometry(mainDoorW + 0.2, 0.08, 0.4), matWallAccent);
+    doorStep.position.set(0, 0.04, 0.2);
+    frontSlantedGroup.add(doorStep);
+
+    gFloor.add(frontSlantedGroup);
+
+
+
+    // --- NỘI THẤT TẦNG TRỆT (THEO ĐÚNG HÌNH ẢNH THỰC TẾ GIA CHỦ CUNG CẤP) ---
+    const gFurn = new THREE.Group();
+    furnitureList.push(gFurn);
+    gFloor.add(gFurn);
+
+    // Vật liệu nội thất chuyên biệt
+    const matGraniteBlack = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.25, metalness: 0.1 }); // Đá đen granite mặt bậc
+    const matMarbleWhite = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }); // Cổ bậc đá trắng sứ
+    const matWoodHandrail = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.35 }); // Tay vịn gỗ căm xe/sồi
+    const matCabinetGrey = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 }); // Kệ tủ gầm thang xám ghi
+    const matAltarWood = new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.4 }); // Gỗ bàn thờ thần tài
+    const matTileWall = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.15, metalness: 0.05 }); // Gạch ốp tường bóng kính 1.2m
+
+    // 1. Gạch ốp chân tường bóng kính cao 1.2m (theo ảnh 1, 2, 4)
+    const wainscotL = new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.2, L - 2.2), matTileWall);
+    wainscotL.position.set(X0 + 0.21, 0.6, Z0 + (L - 2.2)/2);
+    const wainscotR = new THREE.Mesh(new THREE.BoxGeometry(0.02, 1.2, L), matTileWall);
+    wainscotR.position.set(X1 - 0.21, 0.6, 0);
+    gFurn.add(wainscotL, wainscotR);
+
+    // 2. KỆ TIVI & PHÒNG KHÁCH (Tường bên trái theo ảnh 4)
+    const tvUnit = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.42, 2.0), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
+    tvUnit.position.set(X0 + 0.38, 0.21, 2.3);
+    const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.8, 1.4), matMetalBlack);
+    tvScreen.position.set(X0 + 0.25, 1.3, 2.3);
+    gFurn.add(tvUnit, tvScreen);
+
+    // Bộ sofa văng nỉ cao cấp & bàn trà đối diện cầu thang
+    const sofaMain = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.7, 1.8), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 }));
+    sofaMain.position.set(0.1, 0.35, 3.2);
+    const coffeeTable = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.38, 16), matWood);
+    coffeeTable.position.set(0.1, 0.19, 2.3);
+    gFurn.add(sofaMain, coffeeTable);
+
+    // =========================================================================
+    // 3. CẦU THANG NẰM NGANG Ở GIỮA NHÀ & HÀNH LANG RỘNG ĐÚNG 0.86M (THEO YÊU CẦU)
+    // =========================================================================
+    // =========================================================================
+    // 3. CẦU THANG 2 VẾ ĐẢO CHIỀU 180 ĐỘ (BẢN THANG RỘNG 0.8M) LÊN LẦU 1
+    // =========================================================================
+    const hallW = 0.86; // Hành lang lối đi bên trái rộng đúng 0.86m
+    const hallEdgeX = X0 + hallW; // Mép hành lang: -0.865m
+    const stairSpanX = X1 - hallEdgeX; // Bề rộng cầu thang nằm ngang: 2.59m
+
+    const stairW = 0.80; // Chiều rộng bản thang chính xác 0.8m theo yêu cầu
+    const stairZ1 = 0.82; // Mép trước vế 1 (hướng ra phòng khách)
+    const stairZMid = 0.0; // Khe giữa 2 vế thang
+    const stairZ2 = -0.82; // Mép sau vế 2
+
+    const stairStepCount = 10; // 10 bậc mỗi vế (kèm chiếu nghỉ tạo thành 21 bậc cung Sinh cho tầng cao 4.0m)
+    const landingW = 0.80; // Chiều rộng chiếu nghỉ theo phương X (0.8m)
+    const landingY = 2.00; // Chiếu nghỉ tại cao độ chính xác 2.0m (chính giữa tầng 4.0m)
+    const runSpanX = stairSpanX - landingW; // Chiều dài đoạn bậc chạy: 2.59 - 0.8 = 1.79m
+    const stepWidthX = runSpanX / stairStepCount; // ~0.179m mỗi bậc
+    const stepRise = landingY / stairStepCount; // 0.20m mỗi bậc (10 x 0.20m = 2.0m)
+
+    // Helper tạo thanh lan can sắt uốn oval nghệ thuật (theo ảnh 4 & 5)
+    function createStairBalusterUnit(h) {
+      const bGroup = new THREE.Group();
+      const ovalCurve = new THREE.EllipseCurve(0, 0, 0.065, 0.22, 0, 2 * Math.PI, false, 0);
+      const points = ovalCurve.getPoints(24);
+      const ovalGeo = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, p.y, 0)));
+      const ovalLine = new THREE.Line(ovalGeo, new THREE.LineBasicMaterial({ color: 0x18181b, linewidth: 2 }));
+      ovalLine.position.y = h * 0.55;
+      bGroup.add(ovalLine);
+
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.018, h, 0.018), matMetalBlack);
+      bar.position.y = h / 2;
+      bGroup.add(bar);
+      return bGroup;
+    }
+
+    // --- VẾ THANG 1 (TỪ TRỆT BƯỚC LÊN SANG PHẢI ĐẾN CHIẾU NGHỈ Y=2.0M) ---
+    for (let i = 0; i < stairStepCount; i++) {
+      const curX = hallEdgeX + i * stepWidthX + stepWidthX / 2;
+      const curY = i * stepRise;
+      const curZ = (stairZ1 + stairZMid) / 2;
+
+      // Cổ bậc đá trắng sứ
+      const riser = new THREE.Mesh(new THREE.BoxGeometry(0.03, stepRise, stairW), matMarbleWhite);
+      riser.position.set(curX - stepWidthX / 2, curY + stepRise / 2, curZ);
+      // Mặt bậc đá đen granite kim sa
+      const tread = new THREE.Mesh(new THREE.BoxGeometry(stepWidthX + 0.03, 0.035, stairW + 0.02), matGraniteBlack);
+      tread.position.set(curX, curY + stepRise, curZ);
+      gFurn.add(riser, tread);
+
+      // Lan can sắt hoa oval mép trước vế 1 (nhìn ra phòng khách)
+      if (i >= 1) {
+        const baluster = createStairBalusterUnit(0.85);
+        baluster.position.set(curX, curY + stepRise, stairZ1 - 0.02);
+        gFurn.add(baluster);
+      }
+    }
+
+    // Tay vịn gỗ vế 1
+    const railLen1 = Math.hypot(runSpanX, landingY);
+    const railSlope1 = -Math.atan2(landingY, runSpanX);
+    const woodRail1 = new THREE.Mesh(new THREE.BoxGeometry(railLen1, 0.07, 0.05), matWoodHandrail);
+    woodRail1.position.set(
+      hallEdgeX + runSpanX / 2,
+      landingY / 2 + 0.9,
+      stairZ1 - 0.02
+    );
+    woodRail1.rotation.z = railSlope1;
+    gFurn.add(woodRail1);
+
+    // --- CHIẾU NGHỈ CẦU THANG (LANDING) TẠI CAO ĐỘ Y = 2.0M ---
+    const landingZLen = Math.abs(stairZ1 - stairZ2); // 1.64m (bao phủ cả 2 vế thang)
+    const landingZMid = (stairZ1 + stairZ2) / 2;
+    const landingXMid = X1 - landingW / 2;
+
+    const landing = new THREE.Mesh(new THREE.BoxGeometry(landingW, 0.04, landingZLen), matGraniteBlack);
+    landing.position.set(landingXMid, landingY, landingZMid);
+    gFurn.add(landing);
+
+    // Lan can chiếu nghỉ tường phải
+    const landingRail = new THREE.Mesh(new THREE.BoxGeometry(landingW, 0.07, 0.05), matWoodHandrail);
+    landingRail.position.set(landingXMid, landingY + 0.9, stairZ1 - 0.02);
+    gFurn.add(landingRail);
+
+    // --- VẾ THANG 2 (VẾ ĐẢO CHIỀU 180 ĐỘ: TỪ CHIẾU NGHỈ BƯỚC LÊN SANG TRÁI LÊN LẦU 1 Y=4.0M) ---
+    for (let i = 0; i < stairStepCount; i++) {
+      // Vế 2 bước từ phải (X1 - landingW) sang trái (hallEdgeX)
+      const curX = (X1 - landingW) - i * stepWidthX - stepWidthX / 2;
+      const curY = landingY + i * stepRise;
+      const curZ = (stairZMid + stairZ2) / 2;
+
+      // Cổ bậc đá trắng sứ vế 2
+      const riser2 = new THREE.Mesh(new THREE.BoxGeometry(0.03, stepRise, stairW), matMarbleWhite);
+      riser2.position.set(curX + stepWidthX / 2, curY + stepRise / 2, curZ);
+      // Mặt bậc đá đen granite vế 2
+      const tread2 = new THREE.Mesh(new THREE.BoxGeometry(stepWidthX + 0.03, 0.035, stairW + 0.02), matGraniteBlack);
+      tread2.position.set(curX, curY + stepRise, curZ);
+      gFurn.add(riser2, tread2);
+
+      // Lan can sắt hoa oval vế 2 (ở khe giữa 2 vế thang)
+      if (i >= 0) {
+        const baluster2 = createStairBalusterUnit(0.85);
+        baluster2.position.set(curX, curY + stepRise, stairZMid - 0.02);
+        gFurn.add(baluster2);
+      }
+    }
+
+    // Tay vịn gỗ vế 2 đảo chiều dốc lên sàn Lầu 1 (chạm mốc Y=4.0m)
+    const railSlope2 = Math.atan2(landingY, runSpanX);
+    const woodRail2 = new THREE.Mesh(new THREE.BoxGeometry(railLen1, 0.07, 0.05), matWoodHandrail);
+    woodRail2.position.set(
+      hallEdgeX + runSpanX / 2,
+      landingY + landingY / 2 + 0.9,
+      stairZMid - 0.02
+    );
+    woodRail2.rotation.z = railSlope2;
+    gFurn.add(woodRail2);
+
+    // 4. HỆ KỆ TRANG TRÍ Ô VUÔNG & TỦ KHO GẦM CẦU THANG VẾ 1 (Chuẩn theo ảnh 4 & 5)
+    const underStairGroup = new THREE.Group();
+    const shelfDepth = 0.35;
+    const cubbyCols = 4;
+    const cubbyW = 1.3 / cubbyCols;
+    const cubbyH = 0.34;
+
+    for (let c = 0; c < cubbyCols; c++) {
+      const maxRow = c + 1;
+      for (let r = 0; r < maxRow; r++) {
+        const cellX = hallEdgeX + 0.42 + c * cubbyW;
+        const cellY = r * cubbyH + cubbyH / 2 + 0.05;
+        const cellZ = stairZ1 - shelfDepth / 2;
+
+        const cellBox = new THREE.Mesh(new THREE.BoxGeometry(cubbyW - 0.03, cubbyH - 0.03, shelfDepth - 0.04), new THREE.MeshStandardMaterial({ color: 0x475569 }));
+        cellBox.position.set(cellX, cellY, cellZ);
+        underStairGroup.add(cellBox);
+
+        if (r === 0 || c === 2) {
+          const bookItem = new THREE.Mesh(new THREE.BoxGeometry(0.08, cubbyH * 0.6, shelfDepth * 0.6), new THREE.MeshStandardMaterial({ color: (c % 2 === 0) ? 0xd97706 : 0xef4444 }));
+          bookItem.position.set(cellX, cellY - cubbyH * 0.15, cellZ);
+          underStairGroup.add(bookItem);
+        }
+      }
+    }
+
+    // Tủ kho kín màu xám ở đoạn cao dưới vế 1
+    const tallStorage = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.7, shelfDepth), matCabinetGrey);
+    tallStorage.position.set(X1 - landingW - 0.3, 0.85, stairZ1 - shelfDepth / 2);
+    const h1 = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.2, 0.01), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    h1.position.set(X1 - landingW - 0.35, 0.9, stairZ1 + 0.01);
+    underStairGroup.add(tallStorage, h1);
+    gFurn.add(underStairGroup);
+
+    // 5. BÀN THỜ THẦN TÀI - THỔ ĐỊA ĐẶT NGAY CHÂN CẦU THANG (Mép hành lang 0.86m)
+    const altarGroup = new THREE.Group();
+    const altarBody = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.58, 0.38), matAltarWood);
+    altarBody.position.set(0, 0.29, 0);
+    const statue1 = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.3 }));
+    statue1.position.set(-0.05, 0.28, 0.05);
+    const statue2 = statue1.clone();
+    statue2.position.set(0.05, 0.28, 0.05);
+    const flowerVase = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.18, 12), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+    flowerVase.position.set(0.14, 0.09, -0.05);
+    const flowerBlooms = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
+    flowerBlooms.position.set(0.14, 0.24, -0.05);
+    const fruitDish = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.05, 0.03, 12), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+    fruitDish.position.set(-0.12, 0.02, 0.12);
+    const fruitFruit = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshStandardMaterial({ color: 0x84cc16 }));
+    fruitFruit.position.set(-0.12, 0.06, 0.12);
+
+    altarGroup.add(altarBody, statue1, statue2, flowerVase, flowerBlooms, fruitDish, fruitFruit);
+    altarGroup.position.set(hallEdgeX + 0.25, 0, stairZ1 + 0.32);
+    gFurn.add(altarGroup);
+
+    // =========================================================================
+    // 6. PHÒNG PHÍA SAU CẦU THANG CÓ CỬA RIÊNG (THEO YÊU CẦU GIA CHỦ)
+    // =========================================================================
+    const backRoomZStart = stairZ2 - 0.08; // ~ -0.90m (ngay sau vế thang 2 đảo chiều)
+    const backRoomZEnd = -3.8;            // Chiều dài phòng ~ 2.9m
+    const backRoomLen = Math.abs(backRoomZEnd - backRoomZStart);
+
+    // Vách ngăn giữa Vế 2 Cầu thang và Phòng phía sau - Chiều cao 4.0m
+    const stairBackWall = createWall(stairSpanX, 4.0, 0.15, hallEdgeX + stairSpanX / 2, 0, backRoomZStart, matWallWhite);
+    gFurn.add(stairBackWall);
+
+    // Vách ngăn giữa Hành lang 0.86m và Phòng phía sau - Chiều cao 4.0m
+    const hallWallLen = backRoomLen;
+    const hallWall = createWall(0.15, 4.0, hallWallLen, hallEdgeX, 0, (backRoomZStart + backRoomZEnd) / 2, matWallWhite);
+    gFurn.add(hallWall);
+
+    // CỬA VÀO PHÒNG PHÍA SAU (Mở ra hành lang 0.86m, theo ảnh 1 & 2)
+    const roomDoorGroup = new THREE.Group();
+    const roomDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.16, 2.35, 0.88), matWoodDark);
+    roomDoorFrame.position.set(0, 1.175, 0);
+    const roomDoorLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.25, 0.78), matWoodDark);
+    roomDoorLeaf.position.set(0, 1.15, 0);
+    const doorHandleLever = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.03, 0.12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+    doorHandleLever.position.set(0, 1.05, 0.3);
+    roomDoorGroup.add(roomDoorFrame, roomDoorLeaf, doorHandleLever);
+    roomDoorGroup.position.set(hallEdgeX, 0, backRoomZStart - 0.8);
+    gFurn.add(roomDoorGroup);
+
+    // NỘI THẤT BÊN TRONG PHÒNG PHÍA SAU (THEO ẢNH 3 - TỦ ÁO CÁNH LÙA VÁT DƯỚI DẦM)
+    // Tủ quần áo 2 cánh lùa hiện đại màu xám nhôm (chuẩn 100% theo ảnh 3)
+    const wardrobeGroup = new THREE.Group();
+    const wardBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.5, 0.6), new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 }));
+    wardBody.position.set(0, 1.25, 0);
+    // 2 Cánh cửa lùa với viền nhôm trắng
+    const doorSlide1 = new THREE.Mesh(new THREE.BoxGeometry(0.78, 2.35, 0.03), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.3 }));
+    doorSlide1.position.set(-0.38, 1.25, 0.31);
+    const doorSlide2 = doorSlide1.clone();
+    doorSlide2.position.set(0.38, 1.25, 0.31);
+    // Kệ ngăn mở bên cạnh tủ (như ảnh 3)
+    const sideShelves = new THREE.Mesh(new THREE.BoxGeometry(0.45, 2.5, 0.58), new THREE.MeshStandardMaterial({ color: 0x475569 }));
+    sideShelves.position.set(1.0, 1.25, 0);
+    wardrobeGroup.add(wardBody, doorSlide1, doorSlide2, sideShelves);
+    wardrobeGroup.position.set(hallEdgeX + 1.1, 0, backRoomZStart - 0.4);
+    gFurn.add(wardrobeGroup);
+
+    // Giường ngủ phòng sau
+    const bedBackRoom = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.45, 1.9), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+    bedBackRoom.position.set(X1 - 0.85, 0.225, backRoomZEnd + 1.1);
+    const bedHead = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.9, 0.1), matWood);
+    bedHead.position.set(X1 - 0.85, 0.45, backRoomZEnd + 0.1);
+    gFurn.add(bedBackRoom, bedHead);
+
+    // =========================================================================
+    // 7. NHÀ VỆ SINH (TOILET) DÙNG CHUNG TẦNG TRỆT (RỘNG 1.2M) - THEO VỊ TRÍ GIA CHỦ KHOANH TRÒN
+    // =========================================================================
+    // Vách ngăn sau phòng ngủ (ngăn cách phòng ngủ và khu WC + sảnh sau tại Z = -3.8m)
+    const bedRearWall = createWall(X1 - hallEdgeX, 4.0, 0.15, (X1 + hallEdgeX)/2, 0, backRoomZEnd, matWallWhite);
+    gFurn.add(bedRearWall);
+
+    // Kích thước Toilet dùng chung: Rộng đúng 1.20m, Dài 1.465m (từ Z = -3.8m đến Z0 = -5.265m)
+    const wcGroup = new THREE.Group();
+    const wcW = 1.20; // Bề ngang đúng 1.2m theo yêu cầu
+    const wcWallX = X1 - wcW; // Vách ngăn dọc tại X = 1.725 - 1.2 = 0.525m
+    const wcMidX = (X1 + wcWallX) / 2; // 1.125m
+    const wcLenZ = Math.abs(Z0 - backRoomZEnd); // 1.465m
+    const wcMidZ = (backRoomZEnd + Z0) / 2; // -4.5325m
+
+    // Nền gạch nhà vệ sinh chống trơn màu xám nhạt
+    const wcFloorMesh = new THREE.Mesh(new THREE.BoxGeometry(wcW - 0.02, 0.02, wcLenZ - 0.02), new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.7 }));
+    wcFloorMesh.position.set(wcMidX, 0.01, wcMidZ);
+    wcGroup.add(wcFloorMesh);
+
+    // VÁCH NGĂN DỌC TOILET VÀ HÀNH LANG (tại X = 0.525m) CÓ CỬA MỞ ĐỐI DIỆN TƯỜNG HÀNH LANG
+    // Cửa toilet rộng 0.72m, cao 2.20m. Vách chia làm 2 đoạn và 1 lanh tô trên
+    const doorWcW = 0.72;
+    const doorWcH = 2.20;
+    const doorWcMidZ = -4.35; // Vị trí cửa trên vách
+
+    // Đoạn tường phía trước cửa (từ -3.8m đến -3.99m)
+    const wallPiece1Len = Math.abs(-3.8 - (doorWcMidZ + doorWcW/2)); // ~0.19m
+    const wallPiece1 = createWall(0.12, 4.0, wallPiece1Len, wcWallX, 0, -3.8 - wallPiece1Len/2, matWallWhite);
+    // Đoạn tường phía sau cửa (từ -4.71m đến -5.265m)
+    const wallPiece2Len = Math.abs((doorWcMidZ - doorWcW/2) - Z0); // ~0.555m
+    const wallPiece2 = createWall(0.12, 4.0, wallPiece2Len, wcWallX, 0, Z0 + wallPiece2Len/2, matWallWhite);
+    // Lanh tô tường trên cửa WC (từ 2.20m lên trần 4.0m, cao 1.80m)
+    const wcLintelH = 4.0 - doorWcH;
+    const wcLintel = new THREE.Mesh(new THREE.BoxGeometry(0.12, wcLintelH, doorWcW), matWallWhite);
+    wcLintel.position.set(wcWallX, doorWcH + wcLintelH/2, doorWcMidZ);
+    wcGroup.add(wallPiece1, wallPiece2, wcLintel);
+
+    // CỬA TOILET (ĐỐI DIỆN TƯỜNG HÔNG TRÁI CỦA HÀNH LANG)
+    const wcDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.14, doorWcH + 0.04, doorWcW), matWoodDark);
+    wcDoorFrame.position.set(wcWallX, (doorWcH + 0.04)/2, doorWcMidZ);
+    // Cánh cửa kính mờ khung nhôm xám chống nước
+    const wcDoorLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.04, doorWcH - 0.05, doorWcW - 0.06), new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3 }));
+    wcDoorLeaf.position.set(wcWallX + 0.02, doorWcH/2, doorWcMidZ);
+    const wcDoorHandle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+    wcDoorHandle.position.set(wcWallX, 1.05, doorWcMidZ - 0.25);
+    wcGroup.add(wcDoorFrame, wcDoorLeaf, wcDoorHandle);
+
+    // TRANG THIẾT BỊ BÊN TRONG TOILET:
+    // 1. BỒN CẦU SỨ TRẮNG (ĐẶT SÁT TƯỜNG SAU NHÀ)
+    const matCeramicWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 });
+    const toiletGroup = new THREE.Group();
+    // Két nước
+    const tank = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.20), matCeramicWhite);
+    tank.position.set(0, 0.62, -0.22);
+    const flushBtn = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.02, 0.04), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+    flushBtn.position.set(0, 0.84, -0.22);
+    // Bệ bồn cầu & nắp ngồi
+    const bowlBase = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.38, 0.46), matCeramicWhite);
+    bowlBase.position.set(0, 0.19, 0.06);
+    const seatCover = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.03, 0.44), matCeramicWhite);
+    seatCover.position.set(0, 0.395, 0.06);
+    // Vòi xịt vệ sinh
+    const sprayer = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.15, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+    sprayer.position.set(0.32, 0.5, -0.1);
+    toiletGroup.add(tank, flushBtn, bowlBase, seatCover, sprayer);
+    toiletGroup.position.set(wcMidX, 0, Z0 + 0.36);
+    wcGroup.add(toiletGroup);
+
+    // 2. BÀN CHẬU LAVABO & GƯƠNG SOI (ĐẶT TỰA VÁCH NGĂN PHÒNG NGỦ)
+    const lavaboGroup = new THREE.Group();
+    const lavaboCounter = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.72, 0.38), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3 }));
+    lavaboCounter.position.set(0, 0.36, 0);
+    const lavaboBasin = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.14, 0.30), matCeramicWhite);
+    lavaboBasin.position.set(0, 0.76, 0);
+    const faucet = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
+    faucet.position.set(0, 0.88, -0.1);
+    // Gương soi đèn led
+    const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.65, 0.02), new THREE.MeshStandardMaterial({ color: 0xe0f2fe, metalness: 0.95, roughness: 0.05 }));
+    mirror.position.set(0, 1.45, -0.17);
+    lavaboGroup.add(lavaboCounter, lavaboBasin, faucet, mirror);
+    lavaboGroup.position.set(wcMidX, 0, backRoomZEnd - 0.22);
+    wcGroup.add(lavaboGroup);
+
+    // 3. KHU VỰC SẢNH HÀNH LANG PHÍA SAU (BÊN NGOÀI TOILET DẪN THẲNG RA CỬA SAU NHÀ)
+    // Đã bỏ máy giặt theo yêu cầu của gia chủ để lối đi ra sau nhà thông thoáng tuyệt đối
+
+    gFurn.add(wcGroup);
+
+    // Hệ thống đèn chiếu sáng
+    createWarmLight(0, 3.2, 2.2, 1.5, 6);              // Đèn phòng khách
+    createWarmLight(hallEdgeX + 0.6, 3.0, 0.1, 1.2, 4);       // Đèn rọi chân cầu thang & bàn thờ
+    createWarmLight(X0 + hallW/2, 3.0, -1.8, 1.0, 4);         // Đèn hành lang 0.86m
+    createWarmLight(hallEdgeX + 1.2, 3.0, -2.2, 1.3, 5);       // Đèn phòng ngủ phía sau
+    createWarmLight(wcMidX, 3.0, wcMidZ, 1.2, 4);              // Đèn bên trong Toilet dùng chung
+    createWarmLight(X0 + 0.6, 3.0, -4.5, 0.9, 4);             // Đèn sảnh hành lang ngoài toilet
+
+    // ==========================================
+    // 2. LẦU 1 (LEVEL 1) - Y: 4.0m -> 8.0m (Chiều cao tầng 4.0m)
+    // ==========================================
+    const f1Floor = new THREE.Group();
+    buildingGroup.add(f1Floor);
+    floorGroups.push(f1Floor);
+
+    // Sàn Lầu 1 tại cao độ 4.0m
+    f1Floor.add(createFloorSlab(4.0, 0.25, matFloorBed));
+
+    // --- TƯỜNG BAO LẦU 1 (ĐỒNG BỘ VÁT GÓC TAM GIÁC THEO RANH ĐẤT - CAO 4.0M) ---
+    f1Floor.add(createWall(0.2, 4.0, L, X1 - 0.1, 4.0, 0)); // Tường hông phải
+    f1Floor.add(createWall(W, 4.0, 0.2, 0, 4.0, Z0 + 0.1)); // Tường sau
+    f1Floor.add(createWall(0.2, 4.0, L - 2.2, X0 + 0.1, 4.0, Z0 + (L - 2.2)/2)); // Tường hông trái
+    f1Floor.add(createWall(X1 - 0.2, 4.0, 0.2, (X1 + 0.2)/2, 4.0, Z1 - 0.1)); // Đoạn tường thẳng phía trước
+
+    // Bệ tường xây dưới cửa sổ Lầu 1 (cao 0.85m)
+    const sillWall1 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, 0.85, 0.2), matWallWhite);
+    sillWall1.position.set(doorAngledMidX, 4.0 + 0.85/2, doorAngledMidZ);
+    sillWall1.rotation.y = doorAngledRotY;
+    f1Floor.add(sillWall1);
+
+    // CỬA SỔ NHÔM KÍNH XINGFA 4 CÁNH CÓ Ô FIX & NAN HOA ĐỒNG LẦU 1 (Cao 2.10m)
+    const winH1 = 2.10;
+    const xingfaWin1 = createXingfa4PanelWindow(doorSlantW - 0.12, winH1, 0.45);
+    xingfaWin1.position.set(doorAngledMidX, 4.0 + 0.85, doorAngledMidZ);
+    xingfaWin1.rotation.y = doorAngledRotY;
+    f1Floor.add(xingfaWin1);
+
+    // Lanh tô tường trên đỉnh cửa sổ Lầu 1 lên trần 8.0m (cao 4.0 - 0.85 - 2.10 = 1.05m)
+    const lintelH1 = 4.0 - 0.85 - winH1;
+    const lintelWall1 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, lintelH1, 0.2), matWallWhite);
+    lintelWall1.position.set(doorAngledMidX, 4.0 + 0.85 + winH1 + lintelH1/2, doorAngledMidZ);
+    lintelWall1.rotation.y = doorAngledRotY;
+    f1Floor.add(lintelWall1);
+
+    // Nội thất Lầu 1
+    const f1Furn = new THREE.Group();
+    furnitureList.push(f1Furn);
+    f1Floor.add(f1Furn);
+
+    const bedMaster = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.5, 2.0), new THREE.MeshStandardMaterial({color: 0x94a3b8}));
+    bedMaster.position.set(0.1, 4.25 + 0.25, 3.2);
+    const wardMaster = new THREE.Mesh(new THREE.BoxGeometry(0.6, 2.8, 1.8), matWoodDark);
+    wardMaster.position.set(X0 + 0.45, 4.25 + 1.4, 2.0);
+    f1Furn.add(bedMaster, wardMaster);
+
+    const wc1Enclosure = createWall(1.4, 2.8, 1.6, X0 + 0.8, 4.0, -0.5, matWallWhite);
+    f1Furn.add(wc1Enclosure);
+
+    const bed2 = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 1.9), new THREE.MeshStandardMaterial({color: 0x64748b}));
+    bed2.position.set(0.2, 4.25 + 0.25, -3.4);
+    const ward2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.6, 1.4), matWood);
+    ward2.position.set(X1 - 0.35, 4.25 + 1.3, -3.2);
+    f1Furn.add(bed2, ward2);
+
+    createWarmLight(0.2, 6.8, 3.0, 1.2, 5);
+    createWarmLight(0.2, 6.8, -3.2, 1.0, 5);
+
+    // ==========================================
+    // 3. LẦU 2 (LEVEL 2) - Y: 8.0m -> 12.0m (Chiều cao tầng 4.0m)
+    // ==========================================
+    const f2Floor = new THREE.Group();
+    buildingGroup.add(f2Floor);
+    floorGroups.push(f2Floor);
+
+    // Sàn Lầu 2 tại cao độ 8.0m
+    f2Floor.add(createFloorSlab(8.0, 0.25, matFloorBed));
+
+    // --- TƯỜNG BAO LẦU 2 (ĐỒNG BỘ VÁT GÓC TAM GIÁC THEO RANH ĐẤT - CAO 4.0M) ---
+    f2Floor.add(createWall(0.2, 4.0, L, X1 - 0.1, 8.0, 0)); // Tường hông phải
+    f2Floor.add(createWall(W, 4.0, 0.2, 0, 8.0, Z0 + 0.1)); // Tường sau
+    f2Floor.add(createWall(0.2, 4.0, L - 2.2, X0 + 0.1, 8.0, Z0 + (L - 2.2)/2)); // Tường hông trái
+    f2Floor.add(createWall(X1 - 0.2, 4.0, 0.2, (X1 + 0.2)/2, 8.0, Z1 - 0.1)); // Đoạn tường thẳng phía trước
+
+    // Bệ tường xây dưới cửa sổ Lầu 2 (cao 0.85m)
+    const sillWall2 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, 0.85, 0.2), matWallWhite);
+    sillWall2.position.set(doorAngledMidX, 8.0 + 0.85/2, doorAngledMidZ);
+    sillWall2.rotation.y = doorAngledRotY;
+    f2Floor.add(sillWall2);
+
+    // CỬA SỔ NHÔM KÍNH XINGFA 4 CÁNH CÓ Ô FIX & NAN HOA ĐỒNG LẦU 2 (Cao 2.10m)
+    const winH2 = 2.10;
+    const xingfaWin2 = createXingfa4PanelWindow(doorSlantW - 0.12, winH2, 0.45);
+    xingfaWin2.position.set(doorAngledMidX, 8.0 + 0.85, doorAngledMidZ);
+    xingfaWin2.rotation.y = doorAngledRotY;
+    f2Floor.add(xingfaWin2);
+
+    // Lanh tô tường trên đỉnh cửa sổ Lầu 2 lên trần 12.0m (cao 4.0 - 0.85 - 2.10 = 1.05m)
+    const lintelH2 = 4.0 - 0.85 - winH2;
+    const lintelWall2 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, lintelH2, 0.2), matWallWhite);
+    lintelWall2.position.set(doorAngledMidX, 8.0 + 0.85 + winH2 + lintelH2/2, doorAngledMidZ);
+    lintelWall2.rotation.y = doorAngledRotY;
+    f2Floor.add(lintelWall2);
+
+    // Nội thất Lầu 2
+    const f2Furn = new THREE.Group();
+    furnitureList.push(f2Furn);
+    f2Floor.add(f2Furn);
+
+    const bed3 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 2.0), new THREE.MeshStandardMaterial({color: 0x94a3b8}));
+    bed3.position.set(0.1, 8.25 + 0.25, 3.2);
+    f2Furn.add(bed3);
+
+    const workDesk = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.75, 0.7), matWoodDark);
+    workDesk.position.set(0, 8.25 + 0.38, -3.2);
+    const bookShelf = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.2, 1.8), matWood);
+    bookShelf.position.set(X1 - 0.25, 8.25 + 1.1, -3.0);
+    f2Furn.add(workDesk, bookShelf);
+
+    createWarmLight(0.2, 10.8, 3.0, 1.1, 5);
+    createWarmLight(0, 10.8, -3.0, 1.1, 5);
+
+    // =======================================================
+    // 4. TUM & SÂN THƯỢNG (ROOFTOP TERRACE) - Y: 12.0m -> 15.5m
+    // =======================================================
+    const roofFloor = new THREE.Group();
+    buildingGroup.add(roofFloor);
+    floorGroups.push(roofFloor);
+
+    // Sàn Sân thượng tại cao độ 12.0m
+    roofFloor.add(createFloorSlab(12.0, 0.25, matFloorTile));
+
+    const tumLength = 4.5;
+    roofFloor.add(createWall(W, 3.2, 0.2, 0, 12.25, -0.2 + tumLength/2));
+    roofFloor.add(createWall(W, 3.2, 0.2, 0, 12.25, -0.2 - tumLength/2));
+    roofFloor.add(createWall(0.2, 3.2, tumLength, X1 - 0.1, 12.25, -0.2));
+    roofFloor.add(createWall(0.2, 3.2, tumLength, X0 + 0.1, 12.25, -0.2));
+
+    const roofTopSlab = new THREE.Mesh(new THREE.BoxGeometry(W, 0.2, tumLength + 0.4), matWallWhite);
+    roofTopSlab.position.set(0, 15.45, -0.2);
+    roofFloor.add(roofTopSlab);
+
+    const waterTank = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.4, 16), new THREE.MeshStandardMaterial({color: 0xe2e8f0, metalness: 0.9, roughness: 0.2}));
+    waterTank.rotation.z = Math.PI / 2;
+    waterTank.position.set(-0.6, 16.2, -0.8);
+    const solarHeater = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.15, 1.4), new THREE.MeshStandardMaterial({color: 0x1e3a8a, metalness: 0.7, roughness: 0.3}));
+    solarHeater.rotation.x = 0.4;
+    solarHeater.position.set(0.6, 16.2, -0.2);
+    roofFloor.add(waterTank, solarHeater);
+
+    // Lan can kính sân thượng mặt tiền uốn theo đúng góc xéo đồng bộ (cao 0.95m tại Y = 12.0m)
+    const roofRailStraight = new THREE.Mesh(new THREE.BoxGeometry(X1 - 0.2, 0.95, 0.04), matGlassRailing);
+    roofRailStraight.position.set((X1 + 0.2)/2, 12.75, Z1 - 0.05);
+    const roofRailSlanted = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, 0.95, 0.04), matGlassRailing);
+    roofRailSlanted.position.set(doorAngledMidX, 12.75, doorAngledMidZ);
+    roofRailSlanted.rotation.y = doorAngledRotY;
+    roofFloor.add(roofRailStraight, roofRailSlanted);
+
+    const pergolaGroup = new THREE.Group();
+    const pPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.0, 0.12), matMetalBlack);
+    pPost1.position.set(X0 + 0.15, 13.75, Z1 - 2.1);
+    const pPost2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.0, 0.12), matMetalBlack);
+    pPost2.position.set(X1 - 0.15, 13.75, Z1 - 0.15);
+    pergolaGroup.add(pPost1, pPost2);
+
+    const beamCount = 9;
+    for (let i = 0; i < beamCount; i++) {
+      const pBeam = new THREE.Mesh(new THREE.BoxGeometry(W - 0.2, 0.08, 0.06), matMetalBlack);
+      pBeam.position.set(0, 15.2, 2.2 + i * 0.35);
+      pergolaGroup.add(pBeam);
+    }
+    roofFloor.add(pergolaGroup);
+
+    roofFloor.add(createPlanter(W - 0.4, 0, 12.25, Z1 - 0.3));
+    const cafeTable = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.7, 16), matWood);
+    cafeTable.position.set(0, 12.6, 3.4);
+    const chair1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.45, 12), matMetalBlack);
+    chair1.position.set(-0.6, 12.48, 3.4);
+    const chair2 = chair1.clone();
+    chair2.position.set(0.6, 12.48, 3.4);
+    roofFloor.add(cafeTable, chair1, chair2);
+
+    const altar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.6), matWoodDark);
+    altar.position.set(0, 12.8, 1.2);
+    roofFloor.add(altar);
+
+    createWarmLight(0, 14.5, 3.2, 1.5, 6);
+
+    // ==========================================
+    // LOGIC ĐIỀU KHIỂN & ANIMATION (TWEEN)
+    // ==========================================
+    let currentMode = 'all';
+
+    const floorDescriptions = {
+      'all': {
+        title: 'Toàn Cảnh Tổng Thể 3D',
+        desc: 'Quy mô 1 Trệt, 2 Lầu, 1 Sân thượng. Chiều cao mỗi tầng quy ước 4.0m thông thoáng, cửa chính tầng trệt 2.15m x 2.36m chuẩn phong thủy.'
+      },
+      'explode': {
+        title: 'Bóc Tách Từng Tầng (Exploded View)',
+        desc: 'Các tầng được nâng tách lớp rời nhau (bước nhảy 3.5m) để dễ dàng quan sát cấu trúc trần, sàn, không gian giao thông và phân chia từng phòng.'
+      },
+      0: {
+        title: 'Mặt Bằng Tầng Trệt (1 Trệt - Cao 4.0m)',
+        desc: 'Cửa nhôm Xingfa 4 cánh 2.15m x 2.36m tại góc xéo -> Phòng khách hiện đại -> Cầu thang U-turn 21 bậc đảo chiều lên Lầu 1 -> Hành lang 0.86m -> Phòng ngủ sau có cửa riêng.'
+      },
+      1: {
+        title: 'Mặt Bằng Lầu 1 (Tầng 2 - Cao 4.0m)',
+        desc: 'Cửa sổ Xingfa 4 cánh nan hoa đồng góc xéo -> Phòng ngủ Master rộng rãi ngập tràn ánh sáng -> Sảnh thang + WC tắm đứng -> Phòng ngủ 2 sau nhà có ô gió.'
+      },
+      2: {
+        title: 'Mặt Bằng Lầu 2 (Tầng 3 - Cao 4.0m)',
+        desc: 'Cửa sổ Xingfa 4 cánh góc xéo đồng bộ -> Phòng ngủ 3 rộng rãi -> Sảnh thang + WC 3 -> Phòng làm việc / đọc sách / phòng học cho con yên tĩnh phía sau.'
+      },
+      3: {
+        title: 'Mặt Bằng Tầng Tum & Sân Thượng (Cốt +12.0m)',
+        desc: 'Phòng thờ trang nghiêm -> Khu giặt phơi tiện lợi -> Sân thượng trước có giàn lam pergola, cây xanh chill BBQ ngoài trời -> Mái đặt bồn nước NLMT.'
+      }
+    };
+
+    function updateFloorInfo(mode) {
+      const data = floorDescriptions[mode] || floorDescriptions['all'];
+      document.getElementById('info-title').innerText = data.title;
+      document.getElementById('info-desc').innerText = data.desc;
+    }
+
+    window.selectFloor = function(mode) {
+      currentMode = mode;
+
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      if (mode === 'all') document.getElementById('btn-all').classList.add('active');
+      else if (mode === 'explode') document.getElementById('btn-explode').classList.add('active');
+      else document.getElementById(`btn-f${mode}`).classList.add('active');
+
+      updateFloorInfo(mode);
+
+      if (mode === 'all') {
+        floorGroups.forEach((fg, idx) => {
+          fg.visible = true;
+          new TWEEN.Tween(fg.position)
+            .to({ y: 0 }, 600)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+        });
+        resetCameraFocus(new THREE.Vector3(0, 7.5, 0), new THREE.Vector3(-18, 15, 24));
+      } else if (mode === 'explode') {
+        const explodeOffsets = [0, 3.5, 7.0, 10.5];
+        floorGroups.forEach((fg, idx) => {
+          fg.visible = true;
+          new TWEEN.Tween(fg.position)
+            .to({ y: explodeOffsets[idx] }, 700)
+            .easing(TWEEN.Easing.Cubic.Out)
+            .start();
+        });
+        resetCameraFocus(new THREE.Vector3(0, 12, 0), new THREE.Vector3(-24, 22, 28));
+      } else {
+        const selectedIdx = parseInt(mode);
+        floorGroups.forEach((fg, idx) => {
+          if (idx === selectedIdx) {
+            fg.visible = true;
+            new TWEEN.Tween(fg.position)
+              .to({ y: -floorBaseY[idx] }, 600)
+              .easing(TWEEN.Easing.Cubic.Out)
+              .start();
+          } else {
+            fg.visible = false;
+          }
+        });
+        resetCameraFocus(new THREE.Vector3(0, 2.0, 0), new THREE.Vector3(-10, 10, 12));
+      }
+    };
+
+    function resetCameraFocus(targetPos, camPos) {
+      new TWEEN.Tween(controls.target)
+        .to(targetPos, 600)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+
+      new TWEEN.Tween(camera.position)
+        .to(camPos, 600)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .start();
+    }
+
+    window.setCameraView = function(view) {
+      if (view === 'front') {
+        resetCameraFocus(new THREE.Vector3(0, 7.5, 4), new THREE.Vector3(0, 4.5, 22));
+      } else if (view === 'door') {
+        // Góc nhìn trực diện vào bộ cửa 4 cánh kích thước 2.15m x 2.36m góc xéo tầng trệt
+        resetCameraFocus(new THREE.Vector3(-0.76, 1.6, Z1 - 1.1), new THREE.Vector3(-3.8, 1.8, Z1 + 2.5));
+      } else if (view === 'stair') {
+        // Góc nhìn chính diện từ phòng khách vào cầu thang 21 bậc (tầng 4.0m) ở giữa nhà & hành lang 0.86m
+        resetCameraFocus(new THREE.Vector3(0.0, 1.4, -0.2), new THREE.Vector3(0.0, 1.5, 3.5));
+      } else if (view === 'hallway') {
+        // Góc nhìn đứng dọc hành lang 0.86m nhìn về cửa phòng sau và cầu thang
+        resetCameraFocus(new THREE.Vector3(-1.29, 1.4, -2.4), new THREE.Vector3(-1.29, 1.5, 2.8));
+      } else if (view === 'wc') {
+        // Góc nhìn trực diện vào Toilet dùng chung tầng trệt rộng 1.2m qua cửa đối diện tường
+        resetCameraFocus(new THREE.Vector3(1.125, 1.2, -4.53), new THREE.Vector3(-0.65, 1.6, -4.35));
+      } else if (view === 'backdoor') {
+        // Góc nhìn trực diện từ sảnh hành lang nhìn ra cửa sau nhà 1.08m x 2.15m
+        resetCameraFocus(new THREE.Vector3(-1.065, 1.3, Z0 + 0.1), new THREE.Vector3(-1.065, 1.45, -2.8));
+      } else if (view === 'iso') {
+        resetCameraFocus(new THREE.Vector3(0, 7.5, 0), new THREE.Vector3(-18, 16, 22));
+      } else if (view === 'top') {
+        resetCameraFocus(new THREE.Vector3(0, 7.5, 0), new THREE.Vector3(0.01, 32, 0.01));
+      } else if (view === 'side') {
+        resetCameraFocus(new THREE.Vector3(0, 7.5, 0), new THREE.Vector3(22, 8, 0));
+      }
+    };
+
+    window.toggleFurniture = function(show) {
+      furnitureList.forEach(furn => {
+        furn.visible = show;
+      });
+    };
+
+    window.toggleXRay = function(active) {
+      matWallWhite.transparent = active;
+      matWallWhite.opacity = active ? 0.35 : 1.0;
+      matWallAccent.transparent = active;
+      matWallAccent.opacity = active ? 0.4 : 1.0;
+      matWallWhite.needsUpdate = true;
+      matWallAccent.needsUpdate = true;
+    };
+
+    window.toggleNightMode = function(isNight) {
+      new TWEEN.Tween(ambientLight)
+        .to({ intensity: isNight ? 0.15 : 0.65 }, 600)
+        .start();
+
+      new TWEEN.Tween(sunLight)
+        .to({ intensity: isNight ? 0.1 : 1.4 }, 600)
+        .start();
+
+      scene.background = new THREE.Color(isNight ? 0x050811 : 0x0c1322);
+      scene.fog.color = new THREE.Color(isNight ? 0x050811 : 0x0c1322);
+
+      warmPointLights.forEach(p => {
+        new TWEEN.Tween(p.light)
+          .to({ intensity: isNight ? p.targetIntensity : 0 }, 600)
+          .start();
+      });
+    };
+
+    window.toggleAutoRotate = function(enable) {
+      controls.autoRotate = enable;
+      controls.autoRotateSpeed = 1.2;
+    };
+
+    function animate(time) {
+      requestAnimationFrame(animate);
+      TWEEN.update(time);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
