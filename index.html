@@ -1903,56 +1903,138 @@
     gFurn.add(altarGroup);
 
     // =========================================================================
-    // 6. PHÒNG PHÍA SAU CẦU THANG CÓ CỬA RIÊNG (THEO YÊU CẦU GIA CHỦ)
     // =========================================================================
-    const backRoomZStart = stairZ2 - 0.08; // ~ -0.90m (ngay sau vế thang 2 đảo chiều)
-    const backRoomZEnd = -3.8;            // Chiều dài phòng ~ 2.9m
-    const backRoomLen = Math.abs(backRoomZEnd - backRoomZStart);
+    // 6. PHÒNG NGỦ TẦNG TRỆT MỞ RỘNG SÁP NHẬP GẦM VẾ 2 CẦU THANG (THEO YÊU CẦU GIA CHỦ)
+    // Sáp nhập toàn bộ không gian gầm vế 2 & gầm chiếu nghỉ (cao 2.0m - 4.0m) vào phòng ngủ
+    // Vách ngăn dời về khe giữa 2 vế thang (Z = 0.0m), diện tích phòng tăng từ 7.5m2 lên ~9.8m2!
+    // =========================================================================
+    const backRoomZStart = 0.0; // Dời vách ngăn lên đúng khe giữa 2 vế thang tại Z = 0.0m
+    const backRoomZEnd = -3.8;  // Vách ngăn sau phòng ngủ tiếp giáp Toilet
+    const backRoomLen = Math.abs(backRoomZEnd - backRoomZStart); // 3.80m (dài thêm 0.90m!)
 
-    // Vách ngăn giữa Vế 2 Cầu thang và Phòng phía sau - Chiều cao 4.0m
-    const stairBackWall = createWall(stairSpanX, 4.0, 0.15, hallEdgeX + stairSpanX / 2, 0, backRoomZStart, matWallWhite);
-    gFurn.add(stairBackWall);
+    // A. Vách ngăn giữa Vế 1 Cầu thang và Phòng ngủ tại khe thang (Z = 0.0m)
+    // Chiều cao xây từ sàn 0.0m lên chạm đáy bản thang Vế 2 và sàn Chiếu nghỉ
+    const stairMidWall = createWall(stairSpanX, 2.05, 0.15, hallEdgeX + stairSpanX / 2, 0, backRoomZStart, matWallWhite);
+    gFurn.add(stairMidWall);
 
-    // Vách ngăn giữa Hành lang 0.86m và Phòng phía sau - Chiều cao 4.0m
-    const hallWallLen = backRoomLen;
-    const hallWall = createWall(0.15, 4.0, hallWallLen, hallEdgeX, 0, (backRoomZStart + backRoomZEnd) / 2, matWallWhite);
-    gFurn.add(hallWall);
+    // B. Bản đáy dốc của Vế 2 (Stair Soffit Slab) tạo trần vát nghệ thuật bên trong phòng ngủ
+    // Dốc từ Y=2.0m (tại mép Chiếu nghỉ X = X1 - landingW) lên Y=4.0m (tại sàn Lầu 1 X = hallEdgeX)
+    const soffitLen = Math.hypot(runSpanX, landingY);
+    const soffitSlope = -Math.atan2(landingY, runSpanX);
+    const stairSoffit = new THREE.Mesh(new THREE.BoxGeometry(soffitLen, 0.08, stairW), matWallWhite);
+    stairSoffit.position.set(
+      hallEdgeX + runSpanX / 2,
+      landingY + landingY / 2 - 0.06,
+      (stairZMid + stairZ2) / 2
+    );
+    stairSoffit.rotation.z = soffitSlope;
+    gFurn.add(stairSoffit);
 
-    // CỬA VÀO PHÒNG PHÍA SAU (Mở ra hành lang 0.86m, theo ảnh 1 & 2)
+    // Đáy sàn Chiếu nghỉ (Landing Soffit) che trần phẳng cao 2.0m phía trên góc làm việc/tủ
+    const landingSoffit = new THREE.Mesh(new THREE.BoxGeometry(landingW, 0.08, stairW), matWallWhite);
+    landingSoffit.position.set(X1 - landingW / 2, landingY - 0.04, (stairZMid + stairZ2) / 2);
+    gFurn.add(landingSoffit);
+
+    // C. Vách ngăn giữa Hành lang 0.86m và Phòng ngủ - Kéo dài suốt từ Z = 0.0m đến Z = -3.8m
+    // Chừa khoảng mở cửa phòng ngủ tại Z = -1.10m (rộng 0.90m, cao 2.2m)
+    const doorClearW = 0.90;
+    const doorClearH = 2.20;
+    const doorCenterZ = -1.10;
+
+    // Đoạn tường hành lang phía trước cửa (từ Z = 0.0m đến Z = -0.65m, dài 0.65m)
+    const hallWallFrontLen = Math.abs(0.0 - (doorCenterZ + doorClearW/2)); // 0.65m
+    const hallWallFront = createWall(0.15, 4.0, hallWallFrontLen, hallEdgeX, 0, (0.0 + doorCenterZ + doorClearW/2)/2, matWallWhite);
+    // Đoạn tường hành lang phía sau cửa (từ Z = -1.55m đến Z = -3.8m, dài 2.25m)
+    const hallWallRearLen = Math.abs((doorCenterZ - doorClearW/2) - backRoomZEnd); // 2.25m
+    const hallWallRear = createWall(0.15, 4.0, hallWallRearLen, hallEdgeX, 0, (doorCenterZ - doorClearW/2 + backRoomZEnd)/2, matWallWhite);
+    // Lanh tô tường phía trên cửa phòng (từ 2.20m lên 4.0m)
+    const doorLintelH = 4.0 - doorClearH;
+    const doorLintel = new THREE.Mesh(new THREE.BoxGeometry(0.15, doorLintelH, doorClearW), matWallWhite);
+    doorLintel.position.set(hallEdgeX, doorClearH + doorLintelH/2, doorCenterZ);
+    gFurn.add(hallWallFront, hallWallRear, doorLintel);
+
+    // CỬA VÀO PHÒNG NGỦ (Mở quay vào trong phòng ngủ từ hành lang 0.86m)
     const roomDoorGroup = new THREE.Group();
-    const roomDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.16, 2.35, 0.88), matWoodDark);
-    roomDoorFrame.position.set(0, 1.175, 0);
-    const roomDoorLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.25, 0.78), matWoodDark);
-    roomDoorLeaf.position.set(0, 1.15, 0);
-    const doorHandleLever = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.03, 0.12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
-    doorHandleLever.position.set(0, 1.05, 0.3);
+    const roomDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.16, doorClearH, doorClearW), matWoodDark);
+    roomDoorFrame.position.set(0, doorClearH/2, 0);
+    // Cánh cửa gỗ mở hé 30 độ vào trong
+    const roomDoorLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.04, doorClearH - 0.05, doorClearW - 0.08), matWoodDark);
+    roomDoorLeaf.position.set(0.05, (doorClearH - 0.05)/2, 0);
+    const doorHandleLever = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.03, 0.10), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+    doorHandleLever.position.set(0.05, 1.05, 0.25);
     roomDoorGroup.add(roomDoorFrame, roomDoorLeaf, doorHandleLever);
-    roomDoorGroup.position.set(hallEdgeX, 0, backRoomZStart - 0.8);
+    roomDoorGroup.position.set(hallEdgeX, 0, doorCenterZ);
     gFurn.add(roomDoorGroup);
 
-    // NỘI THẤT BÊN TRONG PHÒNG PHÍA SAU (THEO ẢNH 3 - TỦ ÁO CÁNH LÙA VÁT DƯỚI DẦM)
-    // Tủ quần áo 2 cánh lùa hiện đại màu xám nhôm (chuẩn 100% theo ảnh 3)
+    // D. NỘI THẤT TRONG KHÔNG GIAN GẦM THANG ĐƯỢC SÁP NHẬP (Z: 0.0m -> -0.82m)
+    // 1. Tủ quần áo 2 cánh lùa hiện đại âm gầm thang (chuẩn 100% theo ảnh 3 gia chủ)
     const wardrobeGroup = new THREE.Group();
-    const wardBody = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.5, 0.6), new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 }));
-    wardBody.position.set(0, 1.25, 0);
-    // 2 Cánh cửa lùa với viền nhôm trắng
-    const doorSlide1 = new THREE.Mesh(new THREE.BoxGeometry(0.78, 2.35, 0.03), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.3 }));
-    doorSlide1.position.set(-0.38, 1.25, 0.31);
+    const wardW = 1.60;
+    const wardH = 2.10;
+    const wardD = 0.60;
+    const wardBody = new THREE.Mesh(new THREE.BoxGeometry(wardW, wardH, wardD), new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 }));
+    wardBody.position.set(0, wardH/2, 0);
+    // 2 Cánh cửa lùa với viền nhôm xám trắng
+    const doorSlide1 = new THREE.Mesh(new THREE.BoxGeometry(wardW/2 - 0.02, wardH - 0.08, 0.03), new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.3 }));
+    doorSlide1.position.set(-wardW/4, wardH/2, wardD/2 + 0.01);
     const doorSlide2 = doorSlide1.clone();
-    doorSlide2.position.set(0.38, 1.25, 0.31);
-    // Kệ ngăn mở bên cạnh tủ (như ảnh 3)
-    const sideShelves = new THREE.Mesh(new THREE.BoxGeometry(0.45, 2.5, 0.58), new THREE.MeshStandardMaterial({ color: 0x475569 }));
-    sideShelves.position.set(1.0, 1.25, 0);
+    doorSlide2.position.set(wardW/4, wardH/2, wardD/2 + 0.01);
+    // Kệ ngăn trang trí bo viền mở bên cạnh tủ
+    const sideShelves = new THREE.Mesh(new THREE.BoxGeometry(0.35, wardH, wardD - 0.02), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    sideShelves.position.set(-wardW/2 - 0.175, wardH/2, 0);
     wardrobeGroup.add(wardBody, doorSlide1, doorSlide2, sideShelves);
-    wardrobeGroup.position.set(hallEdgeX + 1.1, 0, backRoomZStart - 0.4);
+    // Đặt tủ quần áo khít khao dưới gầm vế 2
+    wardrobeGroup.position.set(hallEdgeX + 0.6 + wardW/2, 0, -0.42);
     gFurn.add(wardrobeGroup);
 
-    // Giường ngủ phòng sau
-    const bedBackRoom = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.45, 1.9), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
-    bedBackRoom.position.set(X1 - 0.85, 0.225, backRoomZEnd + 1.1);
-    const bedHead = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.9, 0.1), matWood);
-    bedHead.position.set(X1 - 0.85, 0.45, backRoomZEnd + 0.1);
-    gFurn.add(bedBackRoom, bedHead);
+    // 2. Bàn làm việc / Bàn phấn trang điểm nhỏ gọn dưới gầm Chiếu nghỉ (kèm ghế và gương)
+    const deskGroup = new THREE.Group();
+    const deskTop = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.04, 0.55), matWood);
+    deskTop.position.set(0, 0.74, 0);
+    const deskLeg1 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.72, 0.50), matMetalBlack);
+    deskLeg1.position.set(-0.38, 0.36, 0);
+    const deskLeg2 = deskLeg1.clone();
+    deskLeg2.position.set(0.38, 0.36, 0);
+    // Gương soi đèn LED tròn hiện đại trên tường
+    const vanityMirror = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.02, 24), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.1, metalness: 0.9 }));
+    vanityMirror.rotation.x = Math.PI / 2;
+    vanityMirror.position.set(0, 1.35, -0.26);
+    // Ghế đôn nệm ngồi
+    const deskStool = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.38), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 }));
+    deskStool.position.set(0, 0.21, 0.18);
+    deskGroup.add(deskTop, deskLeg1, deskLeg2, vanityMirror, deskStool);
+    deskGroup.position.set(X1 - 0.50, 0, -0.42);
+    gFurn.add(deskGroup);
+
+    // E. KHÔNG GIAN PHÒNG NGỦ CHÍNH (RỘNG RÃI, THOÁNG ĐÃNG)
+    // Giường ngủ đôi Master 1.6m x 2.0m đặt êm ái giữa phòng
+    const bedGroup = new THREE.Group();
+    const bedBase = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.42, 2.05), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
+    bedBase.position.set(0, 0.21, 0);
+    const mattress = new THREE.Mesh(new THREE.BoxGeometry(1.60, 0.20, 2.00), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }));
+    mattress.position.set(0, 0.45, 0);
+    const bedHead = new THREE.Mesh(new THREE.BoxGeometry(1.75, 1.05, 0.08), matWoodDark);
+    bedHead.position.set(0, 0.525, -1.03);
+    const pillow1 = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.12, 0.35), new THREE.MeshStandardMaterial({ color: 0x93c5fd }));
+    pillow1.position.set(-0.45, 0.60, -0.70);
+    const pillow2 = pillow1.clone();
+    pillow2.position.set(0.45, 0.60, -0.70);
+    const duvet = new THREE.Mesh(new THREE.BoxGeometry(1.62, 0.15, 1.30), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    duvet.position.set(0, 0.55, 0.32);
+
+    // 2 Tab đầu giường hai bên
+    const nightstandL = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.45, 0.38), matWood);
+    nightstandL.position.set(-1.15, 0.225, -0.90);
+    const lampL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.25, 12), new THREE.MeshStandardMaterial({ color: 0xfef08a }));
+    lampL.position.set(-1.15, 0.55, -0.90);
+    const nightstandR = nightstandL.clone();
+    nightstandR.position.set(1.15, 0.225, -0.90);
+    const lampR = lampL.clone();
+    lampR.position.set(1.15, 0.55, -0.90);
+
+    bedGroup.add(bedBase, mattress, bedHead, pillow1, pillow2, duvet, nightstandL, lampL, nightstandR, lampR);
+    bedGroup.position.set((X1 + hallEdgeX)/2 + 0.1, 0, -2.60);
+    gFurn.add(bedGroup);
 
     // =========================================================================
     // 7. NHÀ VỆ SINH (TOILET) DÙNG CHUNG TẦNG TRỆT (RỘNG 1.2M) - THEO VỊ TRÍ GIA CHỦ KHOANH TRÒN
