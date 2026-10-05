@@ -1701,23 +1701,41 @@
     const stepWidthX = runSpanX / stairStepCount; // ~0.179m mỗi bậc
     const stepRise = landingY / stairStepCount; // 0.20m mỗi bậc (10 x 0.20m = 2.0m)
 
-    // Helper tạo thanh lan can sắt uốn oval nghệ thuật (theo ảnh 4 & 5)
+    // Helper tạo thanh con tiện lan can sắt uốn oval nghệ thuật (chuẩn theo ảnh gia chủ)
     function createStairBalusterUnit(h) {
       const bGroup = new THREE.Group();
-      const ovalCurve = new THREE.EllipseCurve(0, 0, 0.065, 0.22, 0, 2 * Math.PI, false, 0);
-      const points = ovalCurve.getPoints(24);
-      const ovalGeo = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, p.y, 0)));
-      const ovalLine = new THREE.Line(ovalGeo, new THREE.LineBasicMaterial({ color: 0x18181b, linewidth: 2 }));
-      ovalLine.position.y = h * 0.55;
-      bGroup.add(ovalLine);
+      
+      // Chân đế bắt bu-lông vào mặt bậc đá
+      const baseShoe = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.015, 0.036), matMetalBlack);
+      baseShoe.position.y = 0.0075;
+      bGroup.add(baseShoe);
 
+      // Thanh trục sắt đứng chính giữa
       const bar = new THREE.Mesh(new THREE.BoxGeometry(0.018, h, 0.018), matMetalBlack);
       bar.position.y = h / 2;
       bGroup.add(bar);
+
+      // Họa tiết hoa oval nghệ thuật uốn cong
+      const ovalCurve = new THREE.EllipseCurve(0, 0, 0.065, 0.20, 0, 2 * Math.PI, false, 0);
+      const points = ovalCurve.getPoints(24);
+      const ovalGeo = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, p.y, 0)));
+      const ovalLine = new THREE.Line(ovalGeo, new THREE.LineBasicMaterial({ color: 0x18181b, linewidth: 2 }));
+      ovalLine.position.y = h * 0.52;
+      bGroup.add(ovalLine);
+
+      // 2 Nút hoa quả trám mạ vàng kim trang trí tâm oval
+      const clipGeo = new THREE.OctahedronGeometry(0.016, 0);
+      const clip = new THREE.Mesh(clipGeo, matGoldGrid);
+      clip.scale.set(1.0, 1.3, 0.6);
+      clip.position.set(0, h * 0.52, 0);
+      bGroup.add(clip);
+
       return bGroup;
     }
 
     // --- VẾ THANG 1 (TỪ TRỆT BƯỚC LÊN SANG PHẢI ĐẾN CHIẾU NGHỈ Y=2.0M) ---
+    const balusterH = 0.82; // Chiều cao con tiện chuẩn 0.82m
+
     for (let i = 0; i < stairStepCount; i++) {
       const curX = hallEdgeX + i * stepWidthX + stepWidthX / 2;
       const curY = i * stepRise;
@@ -1731,21 +1749,42 @@
       tread.position.set(curX, curY + stepRise, curZ);
       gFurn.add(riser, tread);
 
-      // Lan can sắt hoa oval mép trước vế 1 (nhìn ra phòng khách)
+      // Con tiện lan can sắt hoa oval mép trước vế 1 (từ bậc 2 đến bậc 10, bậc 1 dành cho Trụ De-ba)
       if (i >= 1) {
-        const baluster = createStairBalusterUnit(0.85);
+        const baluster = createStairBalusterUnit(balusterH);
         baluster.position.set(curX, curY + stepRise, stairZ1 - 0.02);
         gFurn.add(baluster);
       }
     }
 
-    // Tay vịn gỗ vế 1
+    // TRỤ DE-BA (TRỤ CÁI CẦU THANG) GỖ TỰ NHIÊN TẠI BẬC 1 (VẾ 1)
+    const debaPostGroup = new THREE.Group();
+    const debaW = 0.11;
+    const debaH = 1.15;
+    // Thân trụ gỗ vuông vát cạnh
+    const debaBody = new THREE.Mesh(new THREE.BoxGeometry(debaW, debaH, debaW), matWoodHandrail);
+    debaBody.position.y = debaH / 2;
+    // Chân đế trụ giật cấp
+    const debaBase = new THREE.Mesh(new THREE.BoxGeometry(debaW + 0.04, 0.08, debaW + 0.04), matWoodHandrail);
+    debaBase.position.y = 0.04;
+    // Mũ chụp đỉnh trụ kim tự tháp phào chỉ
+    const debaCap = new THREE.Mesh(new THREE.BoxGeometry(debaW + 0.02, 0.04, debaW + 0.02), matWoodHandrail);
+    debaCap.position.y = debaH + 0.02;
+    const debaFinial = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), matWoodHandrail);
+    debaFinial.position.y = debaH + 0.07;
+    debaPostGroup.add(debaBody, debaBase, debaCap, debaFinial);
+    debaPostGroup.position.set(hallEdgeX + stepWidthX / 2, 0.035, stairZ1 - 0.02);
+    gFurn.add(debaPostGroup);
+
+    // TAY VỊN GỖ VẾ 1 (DỐC ĐÚNG CHIỀU TỪ BẬC 1 LÊN CHIẾU NGHỈ)
     const railLen1 = Math.hypot(runSpanX, landingY);
-    const railSlope1 = -Math.atan2(landingY, runSpanX);
-    const woodRail1 = new THREE.Mesh(new THREE.BoxGeometry(railLen1, 0.07, 0.05), matWoodHandrail);
+    const railSlope1 = Math.atan2(landingY, runSpanX); // GÓC DƯƠNG: DỐC TỪ TRÁI LÊN PHẢI CHUẨN XÁC 100%
+    const woodRail1 = new THREE.Mesh(new THREE.BoxGeometry(railLen1, 0.05, 0.065), matWoodHandrail);
+    // Tâm tay vịn tại cao độ chuẩn sao cho mặt dưới tiếp xúc khít đỉnh con tiện balusterH
+    const railCenterY1 = 1.10 + balusterH + 0.025; // 1.945m
     woodRail1.position.set(
       hallEdgeX + runSpanX / 2,
-      landingY / 2 + 0.9,
+      railCenterY1,
       stairZ1 - 0.02
     );
     woodRail1.rotation.z = railSlope1;
@@ -1760,10 +1799,15 @@
     landing.position.set(landingXMid, landingY, landingZMid);
     gFurn.add(landing);
 
-    // Lan can chiếu nghỉ tường phải
-    const landingRail = new THREE.Mesh(new THREE.BoxGeometry(landingW, 0.07, 0.05), matWoodHandrail);
-    landingRail.position.set(landingXMid, landingY + 0.9, stairZ1 - 0.02);
-    gFurn.add(landingRail);
+    // TRỤ GÓC CHIẾU NGHỈ ĐÓN TAY VỊN VẾ 1 (NEWEL POST 1)
+    const landingPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.98, 0.08), matWoodHandrail);
+    landingPost1.position.set(X1 - landingW, landingY + 0.49, stairZ1 - 0.02);
+    gFurn.add(landingPost1);
+
+    // TRỤ GÓC CHIẾU NGHỈ ĐÓN TAY VỊN VẾ 2 TẠI GIẾNG THANG (NEWEL POST 2)
+    const landingPost2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.98, 0.08), matWoodHandrail);
+    landingPost2.position.set(X1 - landingW, landingY + 0.49, stairZMid - 0.02);
+    gFurn.add(landingPost2);
 
     // --- VẾ THANG 2 (VẾ ĐẢO CHIỀU 180 ĐỘ: TỪ CHIẾU NGHỈ BƯỚC LÊN SANG TRÁI LÊN LẦU 1 Y=4.0M) ---
     for (let i = 0; i < stairStepCount; i++) {
@@ -1780,24 +1824,28 @@
       tread2.position.set(curX, curY + stepRise, curZ);
       gFurn.add(riser2, tread2);
 
-      // Lan can sắt hoa oval vế 2 (ở khe giữa 2 vế thang)
-      if (i >= 0) {
-        const baluster2 = createStairBalusterUnit(0.85);
-        baluster2.position.set(curX, curY + stepRise, stairZMid - 0.02);
-        gFurn.add(baluster2);
-      }
+      // Con tiện sắt hoa oval vế 2 (ở khe giếng thang giữa 2 vế thang)
+      const baluster2 = createStairBalusterUnit(balusterH);
+      baluster2.position.set(curX, curY + stepRise, stairZMid - 0.02);
+      gFurn.add(baluster2);
     }
 
-    // Tay vịn gỗ vế 2 đảo chiều dốc lên sàn Lầu 1 (chạm mốc Y=4.0m)
-    const railSlope2 = Math.atan2(landingY, runSpanX);
-    const woodRail2 = new THREE.Mesh(new THREE.BoxGeometry(railLen1, 0.07, 0.05), matWoodHandrail);
+    // TAY VỊN GỖ VẾ 2 ĐẢO CHIỀU DỐC LÊN SÀN LẦU 1 (DỐC ĐÚNG CHIỀU TỪ PHẢI SANG TRÁI LÊN Y=4.0M)
+    const railSlope2 = -Math.atan2(landingY, runSpanX); // GÓC ÂM: DỐC TỪ PHẢI (THẤP) LÊN TRÁI (CAO) CHUẨN XÁC 100%
+    const woodRail2 = new THREE.Mesh(new THREE.BoxGeometry(railLen1, 0.05, 0.065), matWoodHandrail);
+    const railCenterY2 = 3.10 + balusterH + 0.025; // 3.945m
     woodRail2.position.set(
       hallEdgeX + runSpanX / 2,
-      landingY + landingY / 2 + 0.9,
+      railCenterY2,
       stairZMid - 0.02
     );
     woodRail2.rotation.z = railSlope2;
     gFurn.add(woodRail2);
+
+    // TRỤ ĐÓN SÀN LẦU 1 (KẾT THÚC TAY VỊN VẾ 2)
+    const floor1NewelPost = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.98, 0.08), matWoodHandrail);
+    floor1NewelPost.position.set(hallEdgeX, 4.0 + 0.49, stairZMid - 0.02);
+    gFurn.add(floor1NewelPost);
 
     // 4. HỆ KỆ TRANG TRÍ Ô VUÔNG & TỦ KHO GẦM CẦU THANG VẾ 1 (Chuẩn theo ảnh 4 & 5)
     const underStairGroup = new THREE.Group();
