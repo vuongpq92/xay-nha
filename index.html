@@ -2530,9 +2530,9 @@
     const wc1LenZ = 1.20;
     const wc1MidZ = (backRoomZEnd + Z0) / 2; // -4.665m
 
-    // Vách ngăn giữa Phòng Bếp và Toilet tại Z = -4.065m
-    const kitchenWcWall = createWall(X1 - hallEdgeX, 4.0, 0.15, (X1 + hallEdgeX)/2, 4.0, backRoomZEnd, matWallWhite);
-    f1Furn.add(kitchenWcWall);
+    // Vách ngăn giữa Phòng Bếp và Toilet tại Z = -4.065m (rộng đúng 2.00m khít theo Toilet, loại bỏ 100% mảng tường thừa nhô ra 0.59m)
+    const kitchenWcWall = createWall(wc1W, 4.0, 0.15, wc1MidX, 4.0, backRoomZEnd, matWallWhite);
+    wc1Group.add(kitchenWcWall);
 
     // Nền gạch chống trơn toilet Lầu 1
     const wc1FloorMesh = new THREE.Mesh(new THREE.BoxGeometry(wc1W - 0.02, 0.02, wc1LenZ - 0.02), new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.7 }));
