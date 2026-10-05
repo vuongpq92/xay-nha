@@ -373,6 +373,7 @@
         <button class="btn-mini" onclick="setCameraView('window')">Cửa Sổ Vát (1.08x1.26m)</button>
         <button class="btn-mini" onclick="setCameraView('balcony')">Ban Công Lầu 1</button>
         <button class="btn-mini" onclick="setCameraView('rearwin')">Cửa Sổ Hông (1.08x1.26m)</button>
+        <button class="btn-mini" onclick="setCameraView('tum')">Tum Sát Vách Sau</button>
         <button class="btn-mini" onclick="setCameraView('stair')">Cầu Thang Ngang</button>
         <button class="btn-mini" onclick="setCameraView('hallway')">Hành Lang 0.86m</button>
         <button class="btn-mini" onclick="setCameraView('wc')">Toilet Tầng Trệt</button>
@@ -1796,25 +1797,69 @@
     // Sàn Sân thượng tại cao độ 12.0m
     roofFloor.add(createFloorSlab(12.0, 0.25, matFloorTile));
 
+    // --- KHỐI TUM DỜI SÁT 100% VỀ VÁCH PHÍA SAU (Theo yêu cầu gia chủ) ---
+    // Vách sau nhà tại Z0 = -5.265m. Khối tum dài 4.5m kéo dài từ Z0 đến Z = -0.765m
     const tumLength = 4.5;
-    roofFloor.add(createWall(W, 3.2, 0.2, 0, 12.25, -0.2 + tumLength/2));
-    roofFloor.add(createWall(W, 3.2, 0.2, 0, 12.25, -0.2 - tumLength/2));
-    roofFloor.add(createWall(0.2, 3.2, tumLength, X1 - 0.1, 12.25, -0.2));
-    roofFloor.add(createWall(0.2, 3.2, tumLength, X0 + 0.1, 12.25, -0.2));
+    const tumRearZ = Z0 + 0.1; // -5.165m
+    const tumFrontZ = Z0 + tumLength; // -0.765m
+    const tumMidZ = (Z0 + tumFrontZ) / 2; // -3.015m
 
-    const roofTopSlab = new THREE.Mesh(new THREE.BoxGeometry(W, 0.2, tumLength + 0.4), matWallWhite);
-    roofTopSlab.position.set(0, 15.45, -0.2);
+    // 1. Tường sau Tum: Đặt sát trùng khít vách sau nhà Z0 = -5.165m (rộng W, cao 3.2m)
+    roofFloor.add(createWall(W, 3.2, 0.2, 0, 12.25, tumRearZ));
+
+    // 2. Hai vách tường hông trái & phải của Tum (chạy từ vách sau Z0 đến mặt trước tum -0.765m)
+    roofFloor.add(createWall(0.2, 3.2, tumLength, X1 - 0.1, 12.25, tumMidZ));
+    roofFloor.add(createWall(0.2, 3.2, tumLength, X0 + 0.1, 12.25, tumMidZ));
+
+    // 3. Mặt trước Tum (tại Z = -0.765m) nhìn ra sân thượng trước có cửa đi nhôm kính Xingfa (0.9m x 2.2m)
+    const tumDoorW = 0.90;
+    const tumDoorH = 2.20;
+    const tumWallPierW = (W - tumDoorW) / 2; // ~1.275m
+    // Trụ tường trái & phải mặt trước tum
+    roofFloor.add(createWall(tumWallPierW, 3.2, 0.2, -tumDoorW/2 - tumWallPierW/2, 12.25, tumFrontZ));
+    roofFloor.add(createWall(tumWallPierW, 3.2, 0.2, tumDoorW/2 + tumWallPierW/2, 12.25, tumFrontZ));
+    // Lanh tô trên cửa tum lên trần
+    const tumLintelH = 3.2 - tumDoorH;
+    const tumLintel = new THREE.Mesh(new THREE.BoxGeometry(tumDoorW, tumLintelH, 0.2), matWallWhite);
+    tumLintel.position.set(0, 12.25 + tumDoorH + tumLintelH/2, tumFrontZ);
+    roofFloor.add(tumLintel);
+
+    // Cửa đi nhôm kính Xingfa mở ra sân thượng trước
+    const tumDoorGroup = new THREE.Group();
+    tumDoorGroup.position.set(0, 12.25, tumFrontZ);
+    const tumDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(tumDoorW, tumDoorH, 0.08), matMetalBlack);
+    tumDoorFrame.position.set(0, tumDoorH/2, 0);
+    const tumDoorGlass = new THREE.Mesh(new THREE.BoxGeometry(tumDoorW - 0.16, tumDoorH - 0.16, 0.015), matGlass);
+    tumDoorGlass.position.set(0, tumDoorH/2, 0);
+    const tumDoorHandle = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.18, 0.04), matMetalBlack);
+    tumDoorHandle.position.set(tumDoorW/2 - 0.12, 1.05, 0.03);
+    tumDoorGroup.add(tumDoorFrame, tumDoorGlass, tumDoorHandle);
+    roofFloor.add(tumDoorGroup);
+
+    // 4. Mái bê tông tum (Roof slab): Che kín toàn bộ tum từ vách sau
+    const roofTopSlab = new THREE.Mesh(new THREE.BoxGeometry(W, 0.2, tumLength + 0.2), matWallWhite);
+    roofTopSlab.position.set(0, 15.45, tumMidZ);
     roofFloor.add(roofTopSlab);
 
+    // 5. Bồn nước Inox & Dàn pin năng lượng mặt trời đặt trên mái Tum sát sau
     const waterTank = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.4, 16), new THREE.MeshStandardMaterial({color: 0xe2e8f0, metalness: 0.9, roughness: 0.2}));
     waterTank.rotation.z = Math.PI / 2;
-    waterTank.position.set(-0.6, 16.2, -0.8);
+    waterTank.position.set(-0.6, 16.2, tumMidZ - 0.8);
     const solarHeater = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.15, 1.4), new THREE.MeshStandardMaterial({color: 0x1e3a8a, metalness: 0.7, roughness: 0.3}));
     solarHeater.rotation.x = 0.4;
-    solarHeater.position.set(0.6, 16.2, -0.2);
+    solarHeater.position.set(0.6, 16.2, tumMidZ + 0.6);
     roofFloor.add(waterTank, solarHeater);
 
-    // Lan can kính sân thượng mặt tiền uốn theo đúng góc xéo đồng bộ (cao 0.95m tại Y = 12.0m)
+    // 6. Lan can bảo vệ 2 bên hông sân thượng trước (từ mặt trước tum -0.765m ra mặt tiền)
+    const sideRailLenR = Z1 - tumFrontZ; // ~6.03m
+    const sideRailR = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.95, sideRailLenR), matGlassRailing);
+    sideRailR.position.set(X1 - 0.05, 12.75, (tumFrontZ + Z1)/2);
+    const sideRailLenL = 3.065 - tumFrontZ; // ~3.83m đến góc vát
+    const sideRailL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.95, sideRailLenL), matGlassRailing);
+    sideRailL.position.set(X0 + 0.05, 12.75, (tumFrontZ + 3.065)/2);
+    roofFloor.add(sideRailR, sideRailL);
+
+    // 7. Lan can kính sân thượng mặt tiền uốn theo đúng góc xéo đồng bộ (cao 0.95m tại Y = 12.0m)
     const roofRailStraight = new THREE.Mesh(new THREE.BoxGeometry(X1 - 0.2, 0.95, 0.04), matGlassRailing);
     roofRailStraight.position.set((X1 + 0.2)/2, 12.75, Z1 - 0.05);
     const roofRailSlanted = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, 0.95, 0.04), matGlassRailing);
@@ -1822,6 +1867,7 @@
     roofRailSlanted.rotation.y = doorAngledRotY;
     roofFloor.add(roofRailStraight, roofRailSlanted);
 
+    // 8. Sân thượng trước siêu rộng rãi (~6.0m): Giàn Pergola, bàn cafe, cây xanh chill BBQ
     const pergolaGroup = new THREE.Group();
     const pPost1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.0, 0.12), matMetalBlack);
     pPost1.position.set(X0 + 0.15, 13.75, Z1 - 2.1);
@@ -1839,18 +1885,20 @@
 
     roofFloor.add(createPlanter(W - 0.4, 0, 12.25, Z1 - 0.3));
     const cafeTable = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.7, 16), matWood);
-    cafeTable.position.set(0, 12.6, 3.4);
+    cafeTable.position.set(0, 12.6, 2.8);
     const chair1 = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.45, 12), matMetalBlack);
-    chair1.position.set(-0.6, 12.48, 3.4);
+    chair1.position.set(-0.6, 12.48, 2.8);
     const chair2 = chair1.clone();
-    chair2.position.set(0.6, 12.48, 3.4);
+    chair2.position.set(0.6, 12.48, 2.8);
     roofFloor.add(cafeTable, chair1, chair2);
 
+    // 9. Phòng thờ trang nghiêm bên trong Tum
     const altar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.6), matWoodDark);
-    altar.position.set(0, 12.8, 1.2);
+    altar.position.set(0, 12.8, tumMidZ + 0.6);
     roofFloor.add(altar);
 
-    createWarmLight(0, 14.5, 3.2, 1.5, 6);
+    createWarmLight(0, 14.5, 2.5, 1.5, 6);
+    createWarmLight(0, 14.0, tumMidZ, 1.2, 5);
 
     // ==========================================
     // LOGIC ĐIỀU KHIỂN & ANIMATION (TWEEN)
@@ -1963,6 +2011,9 @@
       } else if (view === 'rearwin') {
         // Góc nhìn trực diện từ phía hông trái vào hệ 2 cửa sổ phòng sau 1.08m x 1.26m
         resetCameraFocus(new THREE.Vector3(X0 - 0.1, 7.0, -3.5), new THREE.Vector3(X0 - 7.5, 8.0, -3.5));
+      } else if (view === 'tum') {
+        // Góc nhìn toàn cảnh từ trên cao xuống khối Tum dời sát vách sau và sân thượng trước rộng 6m
+        resetCameraFocus(new THREE.Vector3(0, 14.0, 0), new THREE.Vector3(-14, 22, 14));
       } else if (view === 'stair') {
         // Góc nhìn chính diện từ phòng khách vào cầu thang 21 bậc (tầng 4.0m) ở giữa nhà & hành lang 0.86m
         resetCameraFocus(new THREE.Vector3(0.0, 1.4, -0.2), new THREE.Vector3(0.0, 1.5, 3.5));
