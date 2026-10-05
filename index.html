@@ -370,6 +370,7 @@
       <div class="btn-grid">
         <button class="btn-mini" onclick="setCameraView('front')">Mặt Tiền Hẻm</button>
         <button class="btn-mini" onclick="setCameraView('door')">Cửa Trệt Góc Xéo</button>
+        <button class="btn-mini" onclick="setCameraView('window')">Cửa Sổ Lầu 1 (1.08m)</button>
         <button class="btn-mini" onclick="setCameraView('stair')">Cầu Thang Ngang</button>
         <button class="btn-mini" onclick="setCameraView('hallway')">Hành Lang 0.86m</button>
         <button class="btn-mini" onclick="setCameraView('wc')">Toilet Tầng Trệt</button>
@@ -788,12 +789,12 @@
       return doorGroup;
     }
 
-    // Helper tạo cửa sổ nhôm kính Xingfa 4 cánh kèm ô fix và nan hoa đồng (Theo ảnh gia chủ cung cấp)
+    // Helper tạo cửa sổ nhôm kính Xingfa kèm ô fix và nan hoa đồng (Theo ảnh gia chủ cung cấp)
     function createXingfa4PanelWindow(totalW, totalH, transomH) {
       const winGroup = new THREE.Group();
       const frameThick = 0.055;
       const frameDepth = 0.07;
-      const leafCount = 4;
+      const leafCount = totalW > 1.8 ? 4 : 2;
       const panelH = totalH - transomH;
 
       const matGoldGrid = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.85, roughness: 0.25 });
@@ -1322,25 +1323,40 @@
     f1Floor.add(createWall(0.2, 4.0, L - 2.2, X0 + 0.1, 4.0, Z0 + (L - 2.2)/2)); // Tường hông trái
     f1Floor.add(createWall(X1 - 0.2, 4.0, 0.2, (X1 + 0.2)/2, 4.0, Z1 - 0.1)); // Đoạn tường thẳng phía trước
 
-    // Bệ tường xây dưới cửa sổ Lầu 1 (cao 0.85m)
-    const sillWall1 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, 0.85, 0.2), matWallWhite);
-    sillWall1.position.set(doorAngledMidX, 4.0 + 0.85/2, doorAngledMidZ);
-    sillWall1.rotation.y = doorAngledRotY;
-    f1Floor.add(sillWall1);
+    // --- MẢNG TƯỜNG GÓC XÉO & CỬA SỔ XINGFA LẦU 1 (CĂN GIỮA: 1.08M x 2.15M) ---
+    const f1SlantedGroup = new THREE.Group();
+    f1SlantedGroup.position.set(doorAngledMidX, 4.0, doorAngledMidZ);
+    f1SlantedGroup.rotation.y = doorAngledRotY;
 
-    // CỬA SỔ NHÔM KÍNH XINGFA 4 CÁNH CÓ Ô FIX & NAN HOA ĐỒNG LẦU 1 (Cao 2.10m)
-    const winH1 = 2.10;
-    const xingfaWin1 = createXingfa4PanelWindow(doorSlantW - 0.12, winH1, 0.45);
-    xingfaWin1.position.set(doorAngledMidX, 4.0 + 0.85, doorAngledMidZ);
-    xingfaWin1.rotation.y = doorAngledRotY;
-    f1Floor.add(xingfaWin1);
+    const winW1 = 1.08;
+    const winH1 = 2.15;
+    const sillH1 = 0.85;
+    const lintelH1 = 4.0 - sillH1 - winH1; // 1.00m
+    const winSideWallW = (doorSlantW - winW1) / 2; // ~0.922m
 
-    // Lanh tô tường trên đỉnh cửa sổ Lầu 1 lên trần 8.0m (cao 4.0 - 0.85 - 2.10 = 1.05m)
-    const lintelH1 = 4.0 - 0.85 - winH1;
-    const lintelWall1 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, lintelH1, 0.2), matWallWhite);
-    lintelWall1.position.set(doorAngledMidX, 4.0 + 0.85 + winH1 + lintelH1/2, doorAngledMidZ);
-    lintelWall1.rotation.y = doorAngledRotY;
-    f1Floor.add(lintelWall1);
+    // 1. Cửa sổ Xingfa kích thước chuẩn: Ngang 1.08m, Cao 2.15m đặt chính giữa
+    const xingfaWin1 = createXingfa4PanelWindow(winW1, winH1, 0.45);
+    xingfaWin1.position.set(0, sillH1, 0);
+    f1SlantedGroup.add(xingfaWin1);
+
+    // 2. Hai mảng tường đặc hai bên che chắn nội thất và cân bằng kiến trúc (mỗi bên rộng ~0.922m, cao 4.0m)
+    const winSideWallL1 = new THREE.Mesh(new THREE.BoxGeometry(winSideWallW, 4.0, 0.2), matWallWhite);
+    winSideWallL1.position.set(-winW1/2 - winSideWallW/2, 2.0, 0);
+    const winSideWallR1 = new THREE.Mesh(new THREE.BoxGeometry(winSideWallW, 4.0, 0.2), matWallWhite);
+    winSideWallR1.position.set(winW1/2 + winSideWallW/2, 2.0, 0);
+    f1SlantedGroup.add(winSideWallL1, winSideWallR1);
+
+    // 3. Bệ tường xây dưới cửa sổ (rộng 1.08m, cao 0.85m)
+    const sillWall1 = new THREE.Mesh(new THREE.BoxGeometry(winW1, sillH1, 0.2), matWallWhite);
+    sillWall1.position.set(0, sillH1/2, 0);
+    f1SlantedGroup.add(sillWall1);
+
+    // 4. Lanh tô tường trên đỉnh cửa sổ lên trần 8.0m (rộng 1.08m, cao 1.00m)
+    const lintelWall1 = new THREE.Mesh(new THREE.BoxGeometry(winW1, lintelH1, 0.2), matWallWhite);
+    lintelWall1.position.set(0, sillH1 + winH1 + lintelH1/2, 0);
+    f1SlantedGroup.add(lintelWall1);
+
+    f1Floor.add(f1SlantedGroup);
 
     // Nội thất Lầu 1
     const f1Furn = new THREE.Group();
@@ -1381,25 +1397,39 @@
     f2Floor.add(createWall(0.2, 4.0, L - 2.2, X0 + 0.1, 8.0, Z0 + (L - 2.2)/2)); // Tường hông trái
     f2Floor.add(createWall(X1 - 0.2, 4.0, 0.2, (X1 + 0.2)/2, 8.0, Z1 - 0.1)); // Đoạn tường thẳng phía trước
 
-    // Bệ tường xây dưới cửa sổ Lầu 2 (cao 0.85m)
-    const sillWall2 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, 0.85, 0.2), matWallWhite);
-    sillWall2.position.set(doorAngledMidX, 8.0 + 0.85/2, doorAngledMidZ);
-    sillWall2.rotation.y = doorAngledRotY;
-    f2Floor.add(sillWall2);
+    // --- MẢNG TƯỜNG GÓC XÉO & CỬA SỔ XINGFA LẦU 2 (CĂN GIỮA: 1.08M x 2.15M) ---
+    const f2SlantedGroup = new THREE.Group();
+    f2SlantedGroup.position.set(doorAngledMidX, 8.0, doorAngledMidZ);
+    f2SlantedGroup.rotation.y = doorAngledRotY;
 
-    // CỬA SỔ NHÔM KÍNH XINGFA 4 CÁNH CÓ Ô FIX & NAN HOA ĐỒNG LẦU 2 (Cao 2.10m)
-    const winH2 = 2.10;
-    const xingfaWin2 = createXingfa4PanelWindow(doorSlantW - 0.12, winH2, 0.45);
-    xingfaWin2.position.set(doorAngledMidX, 8.0 + 0.85, doorAngledMidZ);
-    xingfaWin2.rotation.y = doorAngledRotY;
-    f2Floor.add(xingfaWin2);
+    const winW2 = 1.08;
+    const winH2 = 2.15;
+    const sillH2 = 0.85;
+    const lintelH2 = 4.0 - sillH2 - winH2; // 1.00m
 
-    // Lanh tô tường trên đỉnh cửa sổ Lầu 2 lên trần 12.0m (cao 4.0 - 0.85 - 2.10 = 1.05m)
-    const lintelH2 = 4.0 - 0.85 - winH2;
-    const lintelWall2 = new THREE.Mesh(new THREE.BoxGeometry(doorSlantW, lintelH2, 0.2), matWallWhite);
-    lintelWall2.position.set(doorAngledMidX, 8.0 + 0.85 + winH2 + lintelH2/2, doorAngledMidZ);
-    lintelWall2.rotation.y = doorAngledRotY;
-    f2Floor.add(lintelWall2);
+    // 1. Cửa sổ Xingfa kích thước chuẩn: Ngang 1.08m, Cao 2.15m đặt chính giữa
+    const xingfaWin2 = createXingfa4PanelWindow(winW2, winH2, 0.45);
+    xingfaWin2.position.set(0, sillH2, 0);
+    f2SlantedGroup.add(xingfaWin2);
+
+    // 2. Hai mảng tường đặc hai bên che chắn nội thất và cân bằng kiến trúc (mỗi bên rộng ~0.922m, cao 4.0m)
+    const winSideWallL2 = new THREE.Mesh(new THREE.BoxGeometry(winSideWallW, 4.0, 0.2), matWallWhite);
+    winSideWallL2.position.set(-winW2/2 - winSideWallW/2, 2.0, 0);
+    const winSideWallR2 = new THREE.Mesh(new THREE.BoxGeometry(winSideWallW, 4.0, 0.2), matWallWhite);
+    winSideWallR2.position.set(winW2/2 + winSideWallW/2, 2.0, 0);
+    f2SlantedGroup.add(winSideWallL2, winSideWallR2);
+
+    // 3. Bệ tường xây dưới cửa sổ (rộng 1.08m, cao 0.85m)
+    const sillWall2 = new THREE.Mesh(new THREE.BoxGeometry(winW2, sillH2, 0.2), matWallWhite);
+    sillWall2.position.set(0, sillH2/2, 0);
+    f2SlantedGroup.add(sillWall2);
+
+    // 4. Lanh tô tường trên đỉnh cửa sổ lên trần 12.0m (rộng 1.08m, cao 1.00m)
+    const lintelWall2 = new THREE.Mesh(new THREE.BoxGeometry(winW2, lintelH2, 0.2), matWallWhite);
+    lintelWall2.position.set(0, sillH2 + winH2 + lintelH2/2, 0);
+    f2SlantedGroup.add(lintelWall2);
+
+    f2Floor.add(f2SlantedGroup);
 
     // Nội thất Lầu 2
     const f2Furn = new THREE.Group();
@@ -1587,6 +1617,9 @@
       } else if (view === 'door') {
         // Góc nhìn trực diện vào bộ cửa 4 cánh kích thước 2.15m x 2.36m góc xéo tầng trệt
         resetCameraFocus(new THREE.Vector3(-0.76, 1.6, Z1 - 1.1), new THREE.Vector3(-3.8, 1.8, Z1 + 2.5));
+      } else if (view === 'window') {
+        // Góc nhìn trực diện vào cửa sổ Xingfa 1.08m x 2.15m nằm giữa mảng tường vát Lầu 1
+        resetCameraFocus(new THREE.Vector3(-0.76, 5.8, Z1 - 1.1), new THREE.Vector3(-3.8, 6.0, Z1 + 3.2));
       } else if (view === 'stair') {
         // Góc nhìn chính diện từ phòng khách vào cầu thang 21 bậc (tầng 4.0m) ở giữa nhà & hành lang 0.86m
         resetCameraFocus(new THREE.Vector3(0.0, 1.4, -0.2), new THREE.Vector3(0.0, 1.5, 3.5));
