@@ -2197,13 +2197,18 @@
     wcGroup.add(wcDoorFrame, wcDoorLeaf, wcDoorHandle);
 
     // =========================================================================
-    // TRANG THIẾT BỊ BÊN TRONG TOILET (NGANG 2.0M x DỌC 1.2M - BỐ TRÍ 3 PHÂN KHU TUYẾN TÍNH):
+    // =========================================================================
+    // TRANG THIẾT BỊ BÊN TRONG TOILET (NGANG 2.0M x DỌC 1.2M - TỐI ƯU LƯU THÔNG TRUNG TÂM):
+    // 1. Bàn cầu xoay hướng ép sát vách hông phải (mép trong), giải phóng trung tâm
+    // 2. Vòi sen tắm đứng độc lập ở góc trong phía sau có vách kính & gờ đá chắn nước
+    // 3. Vòi nước phụ/xả sàn & Vòi xịt vệ sinh bidet gắn vách
+    // 4. Bàn đá Lavabo gương LED ở góc ngoài bên trái gần cửa
     // =========================================================================
     const matCeramicWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 });
 
     // 1. KHU 1: BÀN ĐÁ LAVABO & GƯƠNG SOI ĐÈN LED (GÓC TRÁI GẦN CỬA VÀO X ≈ 0.15m)
     const lavaboGroup = new THREE.Group();
-    // Bàn đá chống nước sang trọng 0.55m x 0.40m
+    // Bàn đá Marble chống nước sang trọng 0.55m x 0.40m
     const lavaboCounter = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.76, 0.40), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 }));
     lavaboCounter.position.set(0, 0.38, 0);
     // Chậu sứ bán âm bàn
@@ -2222,7 +2227,8 @@
     lavaboGroup.position.set(0.15, 0, Z0 + 0.22);
     wcGroup.add(lavaboGroup);
 
-    // 2. KHU 2: BÀN CẦU LIỀN KHỐI SỨ TRẮNG (Ở GIỮA PHÒNG X ≈ 0.85m, ÁP SÁT TƯỜNG SAU Z0 = -5.265M)
+    // 2. KHU 2: BÀN CẦU XOAY HƯỚNG & ÉP SÁT TƯỜNG VÁCH BÊN HÔNG PHẢI (MÉP TRONG)
+    // Két nước áp sát tường hông X1 = +1.725m, thân bồn cầu hướng sang trái (-X), giải phóng 100% trung tâm
     const toiletGroup = new THREE.Group();
     const tank = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.20), matCeramicWhite);
     tank.position.set(0, 0.62, -0.22);
@@ -2232,46 +2238,84 @@
     bowlBase.position.set(0, 0.19, 0.06);
     const seatCover = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.03, 0.44), matCeramicWhite);
     seatCover.position.set(0, 0.395, 0.06);
-    // Vòi xịt vệ sinh & giá treo giấy
-    const sprayer = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.15, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
-    sprayer.position.set(0.32, 0.5, -0.1);
-    const paperHolder = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
-    paperHolder.position.set(0.32, 0.65, 0.05);
-    toiletGroup.add(tank, flushBtn, bowlBase, seatCover, sprayer, paperHolder);
-    toiletGroup.position.set(0.85, 0, Z0 + 0.38);
+    toiletGroup.add(tank, flushBtn, bowlBase, seatCover);
+    // Xoay bồn cầu 90 độ quay mặt về hướng -X (hướng ra khoảng trống trung tâm)
+    toiletGroup.rotation.y = -Math.PI / 2;
+    toiletGroup.position.set(1.42, 0, -4.26);
     wcGroup.add(toiletGroup);
 
-    // VÁCH KÍNH CƯỜNG LỰC NGĂN KHU VỰC TẮM ƯỚT VÀ KHU KHÔ (TẠI X = 1.20m)
+    // VÒI XỊT VỆ SINH (BIDET SPRAY) TREO GỌN TRÊN VÁCH TƯỜNG HÔNG BÊN CẠNH BÀN CẦU
+    const bidetGroup = new THREE.Group();
+    const bidetHolder = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.05), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
+    const bidetSpray = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.16, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
+    bidetSpray.position.set(0, 0.04, 0.02);
+    const bidetHose = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.008, 8, 16, Math.PI), new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
+    bidetHose.position.set(0, -0.05, 0.02);
+    bidetHose.rotation.z = Math.PI / 2;
+    bidetGroup.add(bidetHolder, bidetSpray, bidetHose);
+    bidetGroup.position.set(X1 - 0.03, 0.65, -4.12);
+    wcGroup.add(bidetGroup);
+
+    // VÒI NƯỚC PHỤ / VÒI XẢ SÀN (FLOOR BIBCOCK) GẮN TƯỜNG TIỆN LẤY NƯỚC VỆ SINH & GIẶT RỬA
+    const bibcockGroup = new THREE.Group();
+    const bibcockBody = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.08, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
+    bibcockBody.rotation.z = Math.PI / 2;
+    const bibcockSpout = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.05, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
+    bibcockSpout.position.set(-0.03, -0.02, 0);
+    const bibcockHandle = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.04, 0.02), new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.8 }));
+    bibcockHandle.position.set(0, 0.03, 0);
+    bibcockGroup.add(bibcockBody, bibcockSpout, bibcockHandle);
+    bibcockGroup.position.set(X1 - 0.03, 0.28, -4.44);
+    wcGroup.add(bibcockGroup);
+
+    // HỘP GIẤY VỆ SINH INOX GẮN TƯỜNG
+    const paperBox = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
+    paperBox.position.set(X1 - 0.03, 0.70, -4.38);
+    wcGroup.add(paperBox);
+
+    // 3. KHU 3: KHU VỰC SEN TẮM ĐỨNG ĐỘC LẬP Ở GÓC PHÍA TRONG (WET ZONE)
+    // Có vách kính cường lực và gờ đá chắn nước phân tách tuyệt đối khô - ướt
+    const showerGroup = new THREE.Group();
+
+    // Gờ đá granite chắn nước cao 50mm chạy dọc ngăn tràn nước ra ngoài sàn khô
+    const curbW = X1 - 0.85; // 0.875m
+    const waterCurb = new THREE.Mesh(
+      new THREE.BoxGeometry(curbW, 0.05, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2 })
+    );
+    waterCurb.position.set(0.85 + curbW/2, 0.025, -4.465);
+    wcGroup.add(waterCurb);
+
+    // Vách kính cường lực trong suốt 10mm cao 2.10m ngăn bắn nước
     const glassPartition = new THREE.Mesh(
-      new THREE.BoxGeometry(0.015, 2.10, 0.75),
+      new THREE.BoxGeometry(curbW, 2.10, 0.012),
       new THREE.MeshStandardMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.35, roughness: 0.1 })
     );
-    glassPartition.position.set(1.20, 1.05, Z0 + 0.75/2);
-    // Nẹp Inox cố định vách kính
-    const glassChannel = new THREE.Mesh(new THREE.BoxGeometry(0.03, 2.12, 0.03), matMetalBlack);
-    glassChannel.position.set(1.20, 1.06, Z0 + 0.02);
-    wcGroup.add(glassPartition, glassChannel);
+    glassPartition.position.set(0.85 + curbW/2, 1.05, -4.465);
+    // Nẹp Inox cố định vách kính đỉnh và chân
+    const glassChannelTop = new THREE.Mesh(new THREE.BoxGeometry(curbW, 0.025, 0.025), matMetalBlack);
+    glassChannelTop.position.set(0.85 + curbW/2, 2.10, -4.465);
+    wcGroup.add(glassPartition, glassChannelTop);
 
-    // 3. KHU 3: BỘ SEN CÂY TẮM ĐỨNG MASSAGE INOX 304 (GÓC PHẢI TRONG CÙNG X ≈ 1.55m)
-    const showerGroup = new THREE.Group();
+    // Cần sen cây tắm đứng massage Inox 304 gắn tường sau
     const showerPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.20, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
     showerPipe.position.set(0, 1.60, 0);
     // Củ sen nóng lạnh gắn tường
     const showerMixer = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.08, 0.12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
     showerMixer.position.set(0, 1.00, 0.05);
-    // Bát sen lớn gắn đỉnh cần sen
-    const showerHead = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.02, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
+    // Bát sen lớn 250mm gắn đỉnh cần sen
+    const showerHead = new THREE.Mesh(new THREE.CylinderGeometry(0.125, 0.125, 0.02, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
     showerHead.position.set(0, 2.15, 0.25);
     const showerArm = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.30), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
     showerArm.position.set(0, 2.18, 0.15);
     // Tay sen cầm tay di động
     const handShower = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.012, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
     handShower.position.set(0.12, 1.25, 0.06);
-    // Ga thoát sàn inox góc tường
-    const floorDrain = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.01, 0.12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
-    floorDrain.position.set(0.12, 0.015, 0.45);
+    // Phễu thu sàn Inox dài chuyên dụng thoát nước nhanh khu tắm
+    const floorDrain = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.01, 0.12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
+    floorDrain.position.set(0.20, 0.015, 0.50);
     showerGroup.add(showerPipe, showerMixer, showerHead, showerArm, handShower, floorDrain);
-    showerGroup.position.set(1.55, 0, Z0 + 0.06);
+    showerGroup.position.set(1.35, 0, Z0 + 0.06);
     wcGroup.add(showerGroup);
 
     // 3. KHU VỰC SẢNH HÀNH LANG PHÍA SAU (BÊN NGOÀI TOILET DẪN THẲNG RA CỬA SAU NHÀ)
