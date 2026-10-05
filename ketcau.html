@@ -742,18 +742,28 @@
           <text x="600" y="415" font-size="12" font-weight="600" fill="var(--cad-axis)" text-anchor="middle">Hành lang rộng 0.86m</text>
           <line x1="493" y1="365" x2="710" y2="365" stroke="var(--cad-axis)" stroke-width="1" stroke-dasharray="4,3" />
 
-          <!-- PHÒNG VỆ SINH (WC) TẦNG TRỆT -->
-          <text x="990" y="415" font-size="14" font-weight="700" fill="var(--cad-text)" text-anchor="middle">WC</text>
-          <text x="990" y="432" font-size="10" fill="var(--cad-axis)" text-anchor="middle">-0.05m</text>
-          <!-- Thiết bị: Bồn cầu sứ sát tường sau -->
-          <g id="toilet-bowl" transform="translate(1040, 365)">
+          <!-- PHÒNG VỆ SINH (WC) TẦNG TRỆT KÍCH THƯỚC LỌT LÒNG 1.2M x 2.0M -->
+          <text x="990" y="405" font-size="13" font-weight="700" fill="var(--cad-text)" text-anchor="middle">WC (1.2m x 2.0m)</text>
+          <text x="990" y="422" font-size="9" fill="var(--cad-axis)" text-anchor="middle">-0.05m • Sàn gạch 300x300</text>
+          <!-- Thiết bị: Bàn cầu liền khối sứ sát tường sau -->
+          <g id="toilet-bowl" transform="translate(1045, 365)">
             <rect x="0" y="0" width="22" height="14" rx="2" fill="none" stroke="var(--cad-furn)" stroke-width="1.5" />
             <ellipse cx="11" cy="24" rx="10" ry="14" fill="none" stroke="var(--cad-furn)" stroke-width="1.5" />
+            <text x="11" y="48" font-size="8" fill="var(--cad-furn)" text-anchor="middle">Bàn cầu</text>
           </g>
-          <!-- Thiết bị: Bàn đá Lavabo am bàn -->
-          <g id="lavabo" transform="translate(905, 435)">
+          <!-- Thiết bị: Bàn đá Lavabo âm bàn & gương soi phía trước -->
+          <g id="lavabo" transform="translate(905, 365)">
             <rect x="0" y="0" width="45" height="30" rx="3" fill="none" stroke="var(--cad-furn)" stroke-width="1.5" />
             <ellipse cx="22" cy="15" rx="14" ry="10" fill="none" stroke="var(--cad-furn)" stroke-width="1.2" />
+            <text x="22" y="42" font-size="8" fill="var(--cad-furn)" text-anchor="middle">Lavabo</text>
+          </g>
+          <!-- Thiết bị: Bộ sen cây tắm đứng massage ở giữa phòng -->
+          <g id="shower-cad" transform="translate(975, 435)">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="var(--cad-furn)" stroke-width="1.2" />
+            <circle cx="12" cy="12" r="3" fill="none" stroke="var(--cad-furn)" stroke-width="1" />
+            <line x1="12" y1="3" x2="12" y2="21" stroke="var(--cad-furn)" stroke-width="0.8" />
+            <line x1="3" y1="12" x2="21" y2="12" stroke="var(--cad-furn)" stroke-width="0.8" />
+            <text x="12" y="-4" font-size="8" fill="var(--cad-furn)" text-anchor="middle">Sen cây tắm</text>
           </g>
 
           <!-- PHÒNG NGỦ TẦNG TRỆT (MỞ RỘNG GẦM CẦU THANG VẾ 2) -->
