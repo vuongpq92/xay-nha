@@ -2022,8 +2022,8 @@
     // Vách ngăn dời về khe giữa 2 vế thang (Z = 0.0m), diện tích phòng tăng từ 7.5m2 lên ~9.8m2!
     // =========================================================================
     const backRoomZStart = 0.0; // Dời vách ngăn lên đúng khe giữa 2 vế thang tại Z = 0.0m
-    const backRoomZEnd = -3.25; // Vách ngăn sau phòng ngủ tiếp giáp Toilet (WC dài 2.0m từ Z0 đến -3.25m)
-    const backRoomLen = Math.abs(backRoomZEnd - backRoomZStart); // 3.25m
+    const backRoomZEnd = -4.065; // Vách ngăn sau phòng ngủ tiếp giáp Toilet (WC dọc theo nhà 1.2m lọt lòng từ Z0 đến -4.065m)
+    const backRoomLen = Math.abs(backRoomZEnd - backRoomZStart); // 4.065m
 
     // A. Vách ngăn giữa Vế 1 Cầu thang và Phòng ngủ tại khe thang (Z = 0.0m)
     // Chiều cao xây từ sàn 0.0m lên chạm đáy bản thang Vế 2 và sàn Chiếu nghỉ
@@ -2146,40 +2146,40 @@
     lampR.position.set(1.15, 0.55, -0.90);
 
     bedGroup.add(bedBase, mattress, bedHead, pillow1, pillow2, duvet, nightstandL, lampL, nightstandR, lampR);
-    bedGroup.position.set((X1 + hallEdgeX)/2 + 0.1, 0, -2.15);
+    bedGroup.position.set((X1 + hallEdgeX)/2 + 0.1, 0, -2.95);
     gFurn.add(bedGroup);
 
     // =========================================================================
-    // 7. NHÀ VỆ SINH (TOILET) TẦNG TRỆT KÍCH THƯỚC LỌT LÒNG 1.2M x 2.0M (THEO YÊU CẦU GIA CHỦ)
+    // 7. NHÀ VỆ SINH (TOILET) TẦNG TRỆT KÍCH THƯỚC LỌT LÒNG: TỪ TƯỜNG BÊN RA 2.0M x DỌC THEO NHÀ 1.2M
     // =========================================================================
-    // Vách ngăn sau phòng ngủ tiếp giáp Toilet (tại Z = -3.25m)
+    // Vách ngăn sau phòng ngủ tiếp giáp Toilet (tại Z = -4.065m)
     const bedRearWall = createWall(X1 - hallEdgeX, 4.0, 0.15, (X1 + hallEdgeX)/2, 0, backRoomZEnd, matWallWhite);
     gFurn.add(bedRearWall);
 
-    // Kích thước Toilet lọt lòng: Rộng đúng 1.20m, Dài đúng 2.015m ~ 2.0m (từ Z = -3.25m đến Z0 = -5.265m)
+    // Kích thước Toilet lọt lòng: Chiều từ tường mặt bên ra là 2.0m, Chiều dọc theo nhà là 1.20m lọt lòng
     const wcGroup = new THREE.Group();
-    const wcW = 1.20; // Bề ngang đúng 1.2m theo yêu cầu
-    const wcWallX = X1 - wcW; // Vách ngăn dọc tại X = 1.725 - 1.2 = 0.525m
-    const wcMidX = (X1 + wcWallX) / 2; // 1.125m
-    const wcLenZ = Math.abs(Z0 - backRoomZEnd); // 2.015m (~2.0m theo yêu cầu)
-    const wcMidZ = (backRoomZEnd + Z0) / 2; // -4.2575m
+    const wcW = 2.00; // Bề ngang từ tường hông phải X1 ra lọt lòng đúng 2.0m theo yêu cầu gia chủ
+    const wcWallX = X1 - wcW; // Vách ngăn dọc tại X = 1.725 - 2.00 = -0.275m
+    const wcMidX = (X1 + wcWallX) / 2; // (1.725 - 0.275) / 2 = 0.725m
+    const wcLenZ = Math.abs(Z0 - backRoomZEnd); // 1.20m (từ Z = -4.065m đến Z0 = -5.265m)
+    const wcMidZ = (backRoomZEnd + Z0) / 2; // -4.665m
 
     // Nền gạch nhà vệ sinh chống trơn màu xám nhạt
     const wcFloorMesh = new THREE.Mesh(new THREE.BoxGeometry(wcW - 0.02, 0.02, wcLenZ - 0.02), new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.7 }));
     wcFloorMesh.position.set(wcMidX, 0.01, wcMidZ);
     wcGroup.add(wcFloorMesh);
 
-    // VÁCH NGĂN DỌC TOILET VÀ HÀNH LANG (tại X = 0.525m) CÓ CỬA MỞ Ở KHOẢNG GIỮA (Z = -4.25m)
-    // Cửa toilet rộng 0.75m, cao 2.20m. Vách chia làm 2 đoạn và 1 lanh tô trên
-    const doorWcW = 0.75;
+    // VÁCH NGĂN DỌC TOILET VÀ HÀNH LANG (tại X = -0.275m) CÓ CỬA MỞ Ở KHOẢNG GIỮA (Z = -4.665m)
+    // Cửa toilet rộng 0.70m, cao 2.20m. Vách chia làm 2 đoạn và 1 lanh tô trên
+    const doorWcW = 0.70;
     const doorWcH = 2.20;
-    const doorWcMidZ = -4.25; // Đặt cửa ở giữa phòng để bước vào khoảng sảnh thông thoáng
+    const doorWcMidZ = wcMidZ; // -4.665m
 
-    // Đoạn tường phía trước cửa (từ -3.25m đến -3.875m, dài 0.625m)
-    const wallPiece1Len = Math.abs(backRoomZEnd - (doorWcMidZ + doorWcW/2)); // 0.625m
+    // Đoạn tường phía trước cửa (từ -4.065m đến -4.315m, dài 0.25m)
+    const wallPiece1Len = Math.abs(backRoomZEnd - (doorWcMidZ + doorWcW/2)); // 0.25m
     const wallPiece1 = createWall(0.12, 4.0, wallPiece1Len, wcWallX, 0, (backRoomZEnd + doorWcMidZ + doorWcW/2)/2, matWallWhite);
-    // Đoạn tường phía sau cửa (từ -4.625m đến -5.265m, dài 0.64m)
-    const wallPiece2Len = Math.abs((doorWcMidZ - doorWcW/2) - Z0); // 0.64m
+    // Đoạn tường phía sau cửa (từ -5.015m đến -5.265m, dài 0.25m)
+    const wallPiece2Len = Math.abs((doorWcMidZ - doorWcW/2) - Z0); // 0.25m
     const wallPiece2 = createWall(0.12, 4.0, wallPiece2Len, wcWallX, 0, (doorWcMidZ - doorWcW/2 + Z0)/2, matWallWhite);
     // Lanh tô tường trên cửa WC (từ 2.20m lên trần 4.0m, cao 1.80m)
     const wcLintelH = 4.0 - doorWcH;
@@ -2193,15 +2193,36 @@
     const wcDoorLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.04, doorWcH - 0.05, doorWcW - 0.06), new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3 }));
     wcDoorLeaf.position.set(wcWallX + 0.02, doorWcH/2, doorWcMidZ);
     const wcDoorHandle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.12), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
-    wcDoorHandle.position.set(wcWallX, 1.05, doorWcMidZ - 0.25);
+    wcDoorHandle.position.set(wcWallX, 1.05, doorWcMidZ - 0.20);
     wcGroup.add(wcDoorFrame, wcDoorLeaf, wcDoorHandle);
 
     // =========================================================================
-    // TRANG THIẾT BỊ BÊN TRONG TOILET (1.2M x 2.0M):
+    // TRANG THIẾT BỊ BÊN TRONG TOILET (NGANG 2.0M x DỌC 1.2M - BỐ TRÍ 3 PHÂN KHU TUYẾN TÍNH):
     // =========================================================================
     const matCeramicWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15 });
 
-    // 1. BÀN CẦU LIỀN KHỐI SỨ TRẮNG (ÁP SÁT TƯỜNG SAU Z0 = -5.265M)
+    // 1. KHU 1: BÀN ĐÁ LAVABO & GƯƠNG SOI ĐÈN LED (GÓC TRÁI GẦN CỬA VÀO X ≈ 0.15m)
+    const lavaboGroup = new THREE.Group();
+    // Bàn đá chống nước sang trọng 0.55m x 0.40m
+    const lavaboCounter = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.76, 0.40), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 }));
+    lavaboCounter.position.set(0, 0.38, 0);
+    // Chậu sứ bán âm bàn
+    const lavaboBasin = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.14, 0.30), matCeramicWhite);
+    lavaboBasin.position.set(0, 0.77, 0);
+    // Vòi nóng lạnh inox cao cấp
+    const faucet = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
+    faucet.position.set(0, 0.91, -0.12);
+    // Gương soi đèn LED bo viền chữ nhật cao cấp áp tường sau
+    const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.75, 0.02), new THREE.MeshStandardMaterial({ color: 0xe0f2fe, metalness: 0.95, roughness: 0.05 }));
+    mirror.position.set(0, 1.50, -0.18);
+    // Kệ kính để đồ dùng mỹ phẩm
+    const glassShelf = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.01, 0.10), new THREE.MeshStandardMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.6 }));
+    glassShelf.position.set(0, 1.05, -0.14);
+    lavaboGroup.add(lavaboCounter, lavaboBasin, faucet, mirror, glassShelf);
+    lavaboGroup.position.set(0.15, 0, Z0 + 0.22);
+    wcGroup.add(lavaboGroup);
+
+    // 2. KHU 2: BÀN CẦU LIỀN KHỐI SỨ TRẮNG (Ở GIỮA PHÒNG X ≈ 0.85m, ÁP SÁT TƯỜNG SAU Z0 = -5.265M)
     const toiletGroup = new THREE.Group();
     const tank = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.42, 0.20), matCeramicWhite);
     tank.position.set(0, 0.62, -0.22);
@@ -2217,31 +2238,21 @@
     const paperHolder = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.08), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
     paperHolder.position.set(0.32, 0.65, 0.05);
     toiletGroup.add(tank, flushBtn, bowlBase, seatCover, sprayer, paperHolder);
-    toiletGroup.position.set(wcMidX, 0, Z0 + 0.38);
+    toiletGroup.position.set(0.85, 0, Z0 + 0.38);
     wcGroup.add(toiletGroup);
 
-    // 2. BÀN ĐÁ LAVABO & GƯƠNG SOI ĐÈN LED (ÁP VÁCH PHÒNG NGỦ PHÍA TRƯỚC TẠI Z = -3.25M)
-    const lavaboGroup = new THREE.Group();
-    // Bàn đá chống nước sang trọng 0.65m x 0.42m
-    const lavaboCounter = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.76, 0.42), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 }));
-    lavaboCounter.position.set(0, 0.38, 0);
-    // Chậu sứ âm bàn
-    const lavaboBasin = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.14, 0.32), matCeramicWhite);
-    lavaboBasin.position.set(0, 0.77, 0);
-    // Vòi nóng lạnh inox cao cấp
-    const faucet = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
-    faucet.position.set(0, 0.91, -0.12);
-    // Gương soi đèn LED bo viền chữ nhật cao cấp
-    const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.75, 0.02), new THREE.MeshStandardMaterial({ color: 0xe0f2fe, metalness: 0.95, roughness: 0.05 }));
-    mirror.position.set(0, 1.50, -0.19);
-    // Kệ kính để đồ dùng mỹ phẩm
-    const glassShelf = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.01, 0.12), new THREE.MeshStandardMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.6 }));
-    glassShelf.position.set(0, 1.05, -0.14);
-    lavaboGroup.add(lavaboCounter, lavaboBasin, faucet, mirror, glassShelf);
-    lavaboGroup.position.set(wcMidX, 0, backRoomZEnd - 0.23);
-    wcGroup.add(lavaboGroup);
+    // VÁCH KÍNH CƯỜNG LỰC NGĂN KHU VỰC TẮM ƯỚT VÀ KHU KHÔ (TẠI X = 1.20m)
+    const glassPartition = new THREE.Mesh(
+      new THREE.BoxGeometry(0.015, 2.10, 0.75),
+      new THREE.MeshStandardMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.35, roughness: 0.1 })
+    );
+    glassPartition.position.set(1.20, 1.05, Z0 + 0.75/2);
+    // Nẹp Inox cố định vách kính
+    const glassChannel = new THREE.Mesh(new THREE.BoxGeometry(0.03, 2.12, 0.03), matMetalBlack);
+    glassChannel.position.set(1.20, 1.06, Z0 + 0.02);
+    wcGroup.add(glassPartition, glassChannel);
 
-    // 3. BỘ SEN CÂY TẮM ĐỨNG MASSAGE INOX 304 (KHU TẮM Ở GIỮA PHÒNG)
+    // 3. KHU 3: BỘ SEN CÂY TẮM ĐỨNG MASSAGE INOX 304 (GÓC PHẢI TRONG CÙNG X ≈ 1.55m)
     const showerGroup = new THREE.Group();
     const showerPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.20, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
     showerPipe.position.set(0, 1.60, 0);
@@ -2250,17 +2261,17 @@
     showerMixer.position.set(0, 1.00, 0.05);
     // Bát sen lớn gắn đỉnh cần sen
     const showerHead = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.02, 16), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
-    showerHead.position.set(-0.25, 2.15, 0);
-    const showerArm = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.02, 0.02), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
-    showerArm.position.set(-0.15, 2.18, 0);
+    showerHead.position.set(0, 2.15, 0.25);
+    const showerArm = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.30), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
+    showerArm.position.set(0, 2.18, 0.15);
     // Tay sen cầm tay di động
     const handShower = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.012, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
     handShower.position.set(0.12, 1.25, 0.06);
     // Ga thoát sàn inox góc tường
     const floorDrain = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.01, 0.12), new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 }));
-    floorDrain.position.set(X1 - 0.18 - (X1 - 0.05), 0.015, -0.65);
+    floorDrain.position.set(0.12, 0.015, 0.45);
     showerGroup.add(showerPipe, showerMixer, showerHead, showerArm, handShower, floorDrain);
-    showerGroup.position.set(X1 - 0.05, 0, wcMidZ);
+    showerGroup.position.set(1.55, 0, Z0 + 0.06);
     wcGroup.add(showerGroup);
 
     // 3. KHU VỰC SẢNH HÀNH LANG PHÍA SAU (BÊN NGOÀI TOILET DẪN THẲNG RA CỬA SAU NHÀ)
@@ -2272,9 +2283,9 @@
     createWarmLight(0, 3.2, 2.2, 1.5, 6);              // Đèn phòng khách
     createWarmLight(hallEdgeX + 0.6, 3.0, 0.1, 1.2, 4);       // Đèn rọi chân cầu thang & bàn thờ
     createWarmLight(X0 + hallW/2, 3.0, -1.8, 1.0, 4);         // Đèn hành lang 0.86m
-    createWarmLight(hallEdgeX + 1.2, 3.0, -2.2, 1.3, 5);       // Đèn phòng ngủ phía sau
+    createWarmLight(hallEdgeX + 1.2, 3.0, -2.5, 1.3, 5);       // Đèn phòng ngủ phía sau
     createWarmLight(wcMidX, 3.0, wcMidZ, 1.2, 4);              // Đèn bên trong Toilet dùng chung
-    createWarmLight(X0 + 0.6, 3.0, -4.5, 0.9, 4);             // Đèn sảnh hành lang ngoài toilet
+    createWarmLight(X0 + 0.6, 3.0, -4.665, 0.9, 4);           // Đèn sảnh hành lang ngoài toilet
 
     // ==========================================
     // 2. LẦU 1 (LEVEL 1) - Y: 4.0m -> 8.0m (Chiều cao tầng 4.0m)
@@ -2756,8 +2767,8 @@
         // Góc nhìn đứng dọc hành lang 0.86m nhìn về cửa phòng sau và cầu thang
         resetCameraFocus(new THREE.Vector3(-1.29, 1.4, -2.4), new THREE.Vector3(-1.29, 1.5, 2.8));
       } else if (view === 'wc') {
-        // Góc nhìn trực diện vào Toilet dùng chung tầng trệt rộng 1.2m qua cửa đối diện tường
-        resetCameraFocus(new THREE.Vector3(1.125, 1.2, -4.53), new THREE.Vector3(-0.65, 1.6, -4.35));
+        // Góc nhìn trực diện vào Toilet dùng chung tầng trệt (ngang 2.0m x dọc 1.2m) từ hành lang
+        resetCameraFocus(new THREE.Vector3(0.725, 1.2, -4.665), new THREE.Vector3(-1.8, 1.7, -4.665));
       } else if (view === 'backdoor') {
         // Góc nhìn trực diện từ phía sau nhà nhìn vào Cửa nhôm Xingfa có nan xương tầng trệt (khớp góc ảnh gia chủ)
         resetCameraFocus(new THREE.Vector3(-1.065, 1.25, Z0 + 0.1), new THREE.Vector3(-1.5, 1.6, -8.8));

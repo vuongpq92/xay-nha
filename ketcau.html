@@ -432,13 +432,13 @@
           <!-- Khoang cửa chính 4 cánh tại mảng vát: mở rộng từ gốc -->
           <rect x="30" y="310" width="130" height="130" fill="var(--paper-bg)" stroke="none" transform="rotate(-45 95 375)" />
 
-          <!-- TƯỜNG NGĂN VỆ SINH TẦNG TRỆT (Trục 4 đến 5, góc tường Trục A): kích thước 1300 x 2040mm -->
-          <!-- Vách ngang WC tại Y = 355 (từ X = 890 đến 1088, dày 100mm) -->
-          <rect x="890" y="350" width="198" height="10" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
-          <!-- Vách dọc WC tại X = 890 (từ Y = 355 đến 475, dày 100mm) -->
-          <rect x="885" y="355" width="10" height="120" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
-          <!-- Cửa WC rộng 800mm tại vách dọc X = 890 (Y: 370 -> 450) -->
-          <rect x="885" y="370" width="10" height="80" fill="var(--paper-bg)" stroke="none" />
+          <!-- TƯỜNG NGĂN VỆ SINH TẦNG TRỆT: kích thước lọt lòng Ngang 2000mm x Dọc 1200mm -->
+          <!-- Vách ngăn sau phòng ngủ tại X = 968 (từ Y = 150 đến 350, dày 100mm) -->
+          <rect x="968" y="150" width="10" height="200" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
+          <!-- Vách dọc hành lang tại Y = 350 (từ X = 968 đến 1088, dày 100mm) -->
+          <rect x="968" y="350" width="120" height="10" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
+          <!-- Cửa WC rộng 700mm tại vách dọc Y = 350 (X: 993 -> 1063) -->
+          <rect x="993" y="350" width="70" height="10" fill="var(--paper-bg)" stroke="none" />
         </g>
 
         <!-- 3. HỆ CỘT KẾT CẤU BÊ TÔNG CỐT THÉP 200x200 (COLUMNS) -->
@@ -542,11 +542,11 @@
           <line x1="480" y1="150" x2="480" y2="310" stroke="var(--cad-dim)" stroke-width="1" marker-start="url(#dim-tick)" marker-end="url(#dim-tick)" />
           <text x="470" y="235" font-size="11" font-weight="600" fill="var(--cad-dim)" transform="rotate(-90 470 235)" text-anchor="middle" font-family="'Roboto Mono', monospace">1600</text>
 
-          <!-- Kích thước WC: 1300 x 2040mm -->
-          <line x1="890" y1="465" x2="1088" y2="465" stroke="var(--cad-dim)" stroke-width="1" marker-start="url(#dim-tick)" marker-end="url(#dim-tick)" />
-          <text x="989" y="460" font-size="11" font-weight="600" fill="var(--cad-dim)" text-anchor="middle" font-family="'Roboto Mono', monospace">2040</text>
-          <line x1="875" y1="355" x2="875" y2="475" stroke="var(--cad-dim)" stroke-width="1" marker-start="url(#dim-tick)" marker-end="url(#dim-tick)" />
-          <text x="865" y="415" font-size="11" font-weight="600" fill="var(--cad-dim)" transform="rotate(-90 865 415)" text-anchor="middle" font-family="'Roboto Mono', monospace">1300</text>
+          <!-- Kích thước WC: Ngang 2000mm x Dọc 1200mm -->
+          <line x1="968" y1="365" x2="1088" y2="365" stroke="var(--cad-dim)" stroke-width="1" marker-start="url(#dim-tick)" marker-end="url(#dim-tick)" />
+          <text x="1028" y="360" font-size="11" font-weight="600" fill="var(--cad-dim)" text-anchor="middle" font-family="'Roboto Mono', monospace">1200</text>
+          <line x1="950" y1="150" x2="950" y2="350" stroke="var(--cad-dim)" stroke-width="1" marker-start="url(#dim-tick)" marker-end="url(#dim-tick)" />
+          <text x="940" y="250" font-size="11" font-weight="600" fill="var(--cad-dim)" transform="rotate(-90 940 250)" text-anchor="middle" font-family="'Roboto Mono', monospace">2000</text>
 
           <!-- DIM BỀ NGANG NHÀ TẠI MẶT TIỀN (TRỤC B -> TRỤC A): 3450mm -->
           <line x1="-30" y1="140" x2="-30" y2="485" stroke="var(--cad-dim)" stroke-width="1" marker-start="url(#dim-tick)" marker-end="url(#dim-tick)" />
@@ -643,13 +643,13 @@
             <text x="0" y="-12" font-size="11" font-weight="700" fill="var(--cad-axis)" text-anchor="middle">CỬA CHÍNH 4 CÁNH</text>
           </g>
 
-          <!-- Vách ngăn vệ sinh WC -->
-          <rect x="890" y="350" width="198" height="10" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
-          <rect x="885" y="355" width="10" height="120" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
-          <!-- Cửa WC mở quay vào trong -->
-          <rect x="885" y="370" width="10" height="80" fill="var(--paper-bg)" stroke="none" />
-          <path d="M895,370 A75,75 0 0,1 970,445" fill="none" stroke="var(--cad-furn)" stroke-width="1.2" stroke-dasharray="3,2" />
-          <line x1="895" y1="370" x2="970" y2="370" stroke="var(--cad-furn)" stroke-width="1.5" />
+          <!-- Vách ngăn vệ sinh WC (Ngang 2000mm x Dọc 1200mm) -->
+          <rect x="968" y="150" width="10" height="200" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
+          <rect x="968" y="350" width="120" height="10" fill="none" stroke="var(--cad-wall)" stroke-width="2" />
+          <!-- Cửa WC mở quay vào trong từ hành lang -->
+          <rect x="993" y="350" width="70" height="10" fill="var(--paper-bg)" stroke="none" />
+          <path d="M993,350 A70,70 0 0,1 1063,280" fill="none" stroke="var(--cad-furn)" stroke-width="1.2" stroke-dasharray="3,2" />
+          <line x1="993" y1="350" x2="993" y2="280" stroke="var(--cad-furn)" stroke-width="1.5" />
         </g>
 
         <!-- 3. CỘT BTCT PLAN 2 -->
@@ -742,28 +742,30 @@
           <text x="600" y="415" font-size="12" font-weight="600" fill="var(--cad-axis)" text-anchor="middle">Hành lang rộng 0.86m</text>
           <line x1="493" y1="365" x2="710" y2="365" stroke="var(--cad-axis)" stroke-width="1" stroke-dasharray="4,3" />
 
-          <!-- PHÒNG VỆ SINH (WC) TẦNG TRỆT KÍCH THƯỚC LỌT LÒNG 1.2M x 2.0M -->
-          <text x="990" y="405" font-size="13" font-weight="700" fill="var(--cad-text)" text-anchor="middle">WC (1.2m x 2.0m)</text>
-          <text x="990" y="422" font-size="9" fill="var(--cad-axis)" text-anchor="middle">-0.05m • Sàn gạch 300x300</text>
-          <!-- Thiết bị: Bàn cầu liền khối sứ sát tường sau -->
-          <g id="toilet-bowl" transform="translate(1045, 365)">
+          <!-- PHÒNG VỆ SINH (WC) TẦNG TRỆT KÍCH THƯỚC LỌT LÒNG NGANG 2.0M x DỌC 1.2M -->
+          <text x="1028" y="245" font-size="12" font-weight="700" fill="var(--cad-text)" text-anchor="middle">WC (2.0m x 1.2m)</text>
+          <text x="1028" y="260" font-size="8.5" fill="var(--cad-axis)" text-anchor="middle">-0.05m • Gạch 300x300</text>
+          <!-- Thiết bị: Bàn đá Lavabo âm bàn & gương soi (Góc trái gần cửa vào) -->
+          <g id="lavabo" transform="translate(980, 160)">
+            <rect x="0" y="0" width="35" height="42" rx="3" fill="none" stroke="var(--cad-furn)" stroke-width="1.5" />
+            <ellipse cx="17" cy="21" rx="12" ry="14" fill="none" stroke="var(--cad-furn)" stroke-width="1.2" />
+            <text x="17" y="52" font-size="7.5" fill="var(--cad-furn)" text-anchor="middle">Lavabo</text>
+          </g>
+          <!-- Thiết bị: Bàn cầu liền khối sứ ở giữa áp tường sau -->
+          <g id="toilet-bowl" transform="translate(1030, 160)">
             <rect x="0" y="0" width="22" height="14" rx="2" fill="none" stroke="var(--cad-furn)" stroke-width="1.5" />
             <ellipse cx="11" cy="24" rx="10" ry="14" fill="none" stroke="var(--cad-furn)" stroke-width="1.5" />
-            <text x="11" y="48" font-size="8" fill="var(--cad-furn)" text-anchor="middle">Bàn cầu</text>
+            <text x="11" y="48" font-size="7.5" fill="var(--cad-furn)" text-anchor="middle">Bàn cầu</text>
           </g>
-          <!-- Thiết bị: Bàn đá Lavabo âm bàn & gương soi phía trước -->
-          <g id="lavabo" transform="translate(905, 365)">
-            <rect x="0" y="0" width="45" height="30" rx="3" fill="none" stroke="var(--cad-furn)" stroke-width="1.5" />
-            <ellipse cx="22" cy="15" rx="14" ry="10" fill="none" stroke="var(--cad-furn)" stroke-width="1.2" />
-            <text x="22" y="42" font-size="8" fill="var(--cad-furn)" text-anchor="middle">Lavabo</text>
-          </g>
-          <!-- Thiết bị: Bộ sen cây tắm đứng massage ở giữa phòng -->
-          <g id="shower-cad" transform="translate(975, 435)">
+          <!-- Vách kính cường lực ngăn khu tắm ướt tại Y = 280 -->
+          <line x1="970" y1="280" x2="1088" y2="280" stroke="var(--cad-furn)" stroke-width="1.4" stroke-dasharray="3,2" />
+          <!-- Thiết bị: Bộ sen cây tắm đứng massage ở góc trong cùng -->
+          <g id="shower-cad" transform="translate(1040, 305)">
             <circle cx="12" cy="12" r="9" fill="none" stroke="var(--cad-furn)" stroke-width="1.2" />
             <circle cx="12" cy="12" r="3" fill="none" stroke="var(--cad-furn)" stroke-width="1" />
             <line x1="12" y1="3" x2="12" y2="21" stroke="var(--cad-furn)" stroke-width="0.8" />
             <line x1="3" y1="12" x2="21" y2="12" stroke="var(--cad-furn)" stroke-width="0.8" />
-            <text x="12" y="-4" font-size="8" fill="var(--cad-furn)" text-anchor="middle">Sen cây tắm</text>
+            <text x="12" y="-4" font-size="7.5" fill="var(--cad-furn)" text-anchor="middle">Sen cây tắm</text>
           </g>
 
           <!-- PHÒNG NGỦ TẦNG TRỆT (MỞ RỘNG GẦM CẦU THANG VẾ 2) -->
