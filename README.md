@@ -4,7 +4,8 @@ Ung dung hien thi mo hinh 3D tuong tac kien truc va noi that thuc te cong trinh 
 
 ## Trai Nghiem Truc Tuyen (GitHub Pages)
 Sau khi kich hoat GitHub Pages, truy cap truc tiep tai:
-https://vuongpq92.github.io/xay-nha/
+- **Mo Hinh 3D Tuong Tac**: https://vuongpq92.github.io/xay-nha/
+- **Ban Ve Ket Cau & Kich Thuoc CAD 2D**: https://vuongpq92.github.io/xay-nha/ketcau.html
 
 ---
 
