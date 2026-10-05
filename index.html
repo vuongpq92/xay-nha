@@ -1665,19 +1665,94 @@
     wainscotR.position.set(X1 - 0.21, 0.6, 0);
     gFurn.add(wainscotL, wainscotR);
 
-    // 2. KỆ TIVI & PHÒNG KHÁCH (Tường bên trái theo ảnh 4)
+    // 2. KỆ TIVI & SMART TV 65 INCH (Áp tường bên trái)
+    const tvUnitZ = 2.45;
     const tvUnit = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.42, 2.0), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
-    tvUnit.position.set(X0 + 0.38, 0.21, 2.3);
-    const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.8, 1.4), matMetalBlack);
-    tvScreen.position.set(X0 + 0.25, 1.3, 2.3);
-    gFurn.add(tvUnit, tvScreen);
+    tvUnit.position.set(X0 + 0.38, 0.21, tvUnitZ);
+    const tvScreen = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.82, 1.45), matMetalBlack);
+    tvScreen.position.set(X0 + 0.25, 1.35, tvUnitZ);
+    // Vách ốp gỗ trang trí sau lưng Tivi
+    const tvBackPanel = new THREE.Mesh(new THREE.BoxGeometry(0.03, 1.30, 1.90), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 }));
+    tvBackPanel.position.set(X0 + 0.22, 1.35, tvUnitZ);
+    gFurn.add(tvUnit, tvScreen, tvBackPanel);
 
-    // Bộ sofa văng nỉ cao cấp & bàn trà đối diện cầu thang
-    const sofaMain = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.7, 1.8), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 }));
-    sofaMain.position.set(0.1, 0.35, 3.2);
-    const coffeeTable = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.38, 16), matWood);
-    coffeeTable.position.set(0.1, 0.19, 2.3);
-    gFurn.add(sofaMain, coffeeTable);
+    // =========================================================================
+    // VỊ TRÍ SỐ 1: BỘ SOFA VĂNG NỈ HIỆN ĐẠI ÁP SÁT TƯỜNG BÊN PHẢI (X1)
+    // (Đã xóa bỏ hoàn toàn vị trí số 2 giữa nhà để giải phóng trục giao thông >1.6m)
+    // =========================================================================
+    const sofaGroup = new THREE.Group();
+    const sofaCenterX = X1 - 0.20 - 0.425; // 1.10m (tựa lưng áp sát vách tường phải)
+    const sofaCenterZ = tvUnitZ; // 2.45m (đối diện trực diện Kệ Tivi)
+    const sofaLenZ = 2.20; // Chiều dài sofa 2.20m
+    const sofaDepthX = 0.85; // Chiều sâu sofa 0.85m
+    const matSofaFabric = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }); // Nỉ xám ghi than sang trọng
+    const matSofaCushion = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.85 }); // Đệm ngồi êm ái
+    const matPillowAccent = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.6 }); // Gối tựa vàng hoàng yến điểm nhấn
+    const matPillowLight = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.7 }); // Gối tựa ghi sáng
+
+    // Thảm trải sàn nỉ dệt cao cấp dưới khu vực sofa và bàn trà
+    const rug = new THREE.Mesh(new THREE.BoxGeometry(1.50, 0.01, 2.40), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.9 }));
+    rug.position.set(sofaCenterX - 0.35, 0.005, sofaCenterZ);
+    sofaGroup.add(rug);
+
+    // Đệm ngồi sofa văng chính (Seat base)
+    const sofaSeat = new THREE.Mesh(new THREE.BoxGeometry(sofaDepthX, 0.38, sofaLenZ), matSofaFabric);
+    sofaSeat.position.set(sofaCenterX, 0.19, sofaCenterZ);
+    sofaGroup.add(sofaSeat);
+
+    // Nệm ngồi êm ái nổi phía trên
+    const seatPad = new THREE.Mesh(new THREE.BoxGeometry(sofaDepthX - 0.15, 0.08, sofaLenZ - 0.20), matSofaCushion);
+    seatPad.position.set(sofaCenterX - 0.075, 0.42, sofaCenterZ);
+    sofaGroup.add(seatPad);
+
+    // Tựa lưng sofa êm ái áp sát vách tường phải
+    const sofaBackrest = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.46, sofaLenZ), matSofaFabric);
+    sofaBackrest.position.set(sofaCenterX + (sofaDepthX / 2 - 0.10), 0.38 + 0.23, sofaCenterZ);
+    sofaGroup.add(sofaBackrest);
+
+    // 2 Tay vịn hai đầu sofa
+    const armrestF = new THREE.Mesh(new THREE.BoxGeometry(sofaDepthX, 0.25, 0.14), matSofaFabric);
+    armrestF.position.set(sofaCenterX, 0.38 + 0.125, sofaCenterZ + sofaLenZ / 2 - 0.07);
+    const armrestB = new THREE.Mesh(new THREE.BoxGeometry(sofaDepthX, 0.25, 0.14), matSofaFabric);
+    armrestB.position.set(sofaCenterX, 0.38 + 0.125, sofaCenterZ - sofaLenZ / 2 + 0.07);
+    sofaGroup.add(armrestF, armrestB);
+
+    // Các gối tựa trang trí (Cushions)
+    const sofaPillow1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 0.38), matPillowAccent);
+    sofaPillow1.position.set(sofaCenterX + 0.18, 0.52, sofaCenterZ - 0.60);
+    sofaPillow1.rotation.y = 0.1;
+    const sofaPillow2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 0.38), matPillowLight);
+    sofaPillow2.position.set(sofaCenterX + 0.18, 0.52, sofaCenterZ);
+    const sofaPillow3 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.28, 0.38), matPillowAccent);
+    sofaPillow3.position.set(sofaCenterX + 0.18, 0.52, sofaCenterZ + 0.60);
+    sofaPillow3.rotation.y = -0.1;
+    sofaGroup.add(sofaPillow1, sofaPillow2, sofaPillow3);
+
+    // Bàn trà sofa mặt đá marble vân mây trắng chân kim loại đen
+    const coffeeTableGroup = new THREE.Group();
+    const tableCenterX = 0.25; // Đặt tại X = 0.25m, chừa lối đi thẳng rộng >1.4m giữa nhà
+    const tableCenterZ = sofaCenterZ;
+    const tableTop = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.035, 1.0), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.15 }));
+    tableTop.position.set(tableCenterX, 0.39, tableCenterZ);
+    const matTableLeg = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.6 });
+    const legGeo = new THREE.CylinderGeometry(0.016, 0.016, 0.37, 12);
+    [
+      [-0.18, -0.42],
+      [-0.18, 0.42],
+      [0.18, -0.42],
+      [0.18, 0.42]
+    ].forEach(([dx, dz]) => {
+      const leg = new THREE.Mesh(legGeo, matTableLeg);
+      leg.position.set(tableCenterX + dx, 0.185, tableCenterZ + dz);
+      coffeeTableGroup.add(leg);
+    });
+    // Bình hoa / khay trà decor trang nhã
+    const decorVase = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.03, 0.16, 16), new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.2 }));
+    decorVase.position.set(tableCenterX, 0.39 + 0.08 + 0.0175, tableCenterZ);
+    coffeeTableGroup.add(tableTop, decorVase);
+    sofaGroup.add(coffeeTableGroup);
+
+    gFurn.add(sofaGroup);
 
     // =========================================================================
     // 3. CẦU THANG NẰM NGANG Ở GIỮA NHÀ & HÀNH LANG RỘNG ĐÚNG 0.86M (THEO YÊU CẦU)
