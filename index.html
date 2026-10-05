@@ -1411,22 +1411,22 @@
       return wallGroup;
     }
 
-    // Cột góc chịu lực tại các góc mặt tiền (Chiều cao 4.0m)
-    const colC = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallAccent);
+    // Cột góc chịu lực tại các góc mặt tiền (Chiều cao 4.0m, đồng bộ màu tường trắng)
+    const colC = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallWhite);
     colC.position.set(X0 + 0.125, 2.0, Z1 - 2.2 + 0.125);
-    const colB = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallAccent);
+    const colB = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallWhite);
     colB.position.set(0.2 - 0.125, 2.0, Z1 - 0.125);
-    const colA = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallAccent);
+    const colA = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.0, 0.25), matWallWhite);
     colA.position.set(X1 - 0.125, 2.0, Z1 - 0.125);
     gFloor.add(colA, colB, colC);
 
-    // Mảng tường trang trí mặt tiền đoạn thẳng (giữa điểm B: 0.2 và điểm A: X1) - Chiều cao 4.0m
+    // Mảng tường mặt tiền đoạn thẳng (giữa điểm B: 0.2 và điểm A: X1) - Sơn trắng đồng bộ
     const wallFrontStraightW = X1 - 0.2;
-    const wallFrontStraight = new THREE.Mesh(new THREE.BoxGeometry(wallFrontStraightW, 4.0, 0.2), matWallAccent);
+    const wallFrontStraight = new THREE.Mesh(new THREE.BoxGeometry(wallFrontStraightW, 4.0, 0.2), matWallWhite);
     wallFrontStraight.position.set((X1 + 0.2)/2, 2.0, Z1 - 0.1);
     gFloor.add(wallFrontStraight);
 
-    // Biển số nhà & Đèn hắt tường trang trí bên cạnh cửa
+    // Biển số nhà & Đèn hắt tường trang trí bên cạnh cửa (nổi bật trên nền tường trắng)
     const housePlate = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.22, 0.02), matMetalBlack);
     housePlate.position.set((X1 + 0.2)/2, 1.9, Z1 + 0.01);
     const wallSconce = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.08), matWoodDark);
@@ -1451,11 +1451,11 @@
     mainGlassDoor.position.set(0, 0, 0);
     frontSlantedGroup.add(mainGlassDoor);
 
-    // 2. Hai trụ vách tường hai bên cửa bù khoảng trống mặt nghiêng 2.92m - 2.15m (mỗi bên rộng ~0.385m, cao 4.0m)
+    // 2. Hai trụ vách tường hai bên cửa bù khoảng trống mặt nghiêng 2.92m - 2.15m (màu tường trắng đồng bộ)
     const sideWallW = (doorSlantW - mainDoorW) / 2;
-    const sideWallL = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), matWallAccent);
+    const sideWallL = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), matWallWhite);
     sideWallL.position.set(-mainDoorW/2 - sideWallW/2, 2.0, 0);
-    const sideWallR = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), matWallAccent);
+    const sideWallR = new THREE.Mesh(new THREE.BoxGeometry(sideWallW, 4.0, 0.2), matWallWhite);
     sideWallR.position.set(mainDoorW/2 + sideWallW/2, 2.0, 0);
     frontSlantedGroup.add(sideWallL, sideWallR);
 
@@ -1465,8 +1465,8 @@
     lintelSlanted.position.set(0, mainDoorH + lintelH/2, 0);
     frontSlantedGroup.add(lintelSlanted);
 
-    // 4. Bậc thềm đá hoa cương dẫn vào cửa
-    const doorStep = new THREE.Mesh(new THREE.BoxGeometry(mainDoorW + 0.2, 0.08, 0.4), matWallAccent);
+    // 4. Bậc thềm đá hoa cương dẫn vào cửa (đá granite kim sa đen sang trọng)
+    const doorStep = new THREE.Mesh(new THREE.BoxGeometry(mainDoorW + 0.2, 0.08, 0.4), matMetalBlack);
     doorStep.position.set(0, 0.04, 0.2);
     frontSlantedGroup.add(doorStep);
 
