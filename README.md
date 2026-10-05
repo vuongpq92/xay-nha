@@ -31,4 +31,10 @@ https://vuongpq92.github.io/xay-nha/
 - **Three.js (r128)**: Render 3D WebGL truc tiep tren trinh duyet khong can cai dat plugin.
 - **OrbitControls**: Dieu khien xoay 360 do, pan, zoom muot ma tren ca PC va cam ung cham dien thoai.
 - **Tween.js**: Chuyen canh camera goc nhin thong minh.
+- **Mobile Responsive UI/UX**:
+  - **Zen Mode (`👁️`)**: Nut an/hien 100% giao dien de chiem nguong mo hinh 3D toan man hinh khong bi che khuat.
+  - **Header thu gon thong minh**: O che do di dong (<768px), header tu dong thu nho thanh badge vien bo tron chi chiem <6% chieu cao man hinh, bam de bung xem day du thong tin.
+  - **Thanh camera cuon ngang**: Cho phep nguoi dung dien thoai vuot ngang chuyen nhanh 10 goc camera dac sac (Tum, Ban cong Xingfa, Cua so vat, Cau thang U...).
+  - **Auto Camera FOV**: Tu dong can chinh goc nhin rong (FOV 54) khi cam doc dien thoai de bao quat toan bo 15.5m chieu cao toa nha.
+
 
