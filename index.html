@@ -740,6 +740,11 @@
     sunLight.shadow.bias = -0.0005;
     scene.add(sunLight);
 
+    // Đèn phụ trợ chiếu sáng mặt sau ngôi nhà (giúp cửa sau và cửa sổ mặt sau luôn sáng rõ, sắc nét)
+    const rearFillLight = new THREE.DirectionalLight(0xf1f5f9, 0.75);
+    rearFillLight.position.set(10, 16, -25);
+    scene.add(rearFillLight);
+
     // Đèn nội thất ấm ban đêm
     const warmPointLights = [];
     function createWarmLight(x, y, z, intensity = 1.2, dist = 7) {
@@ -912,24 +917,138 @@
     rearLintel.position.set(rearDoorMidX, rearDoorH + rearLintelH / 2, Z0 + 0.1);
     gFloor.add(rearLintel);
 
-    // BỘ CỬA NHÔM XINGFA ĐI RA SAU NHÀ (NGANG 1.08M, CAO 2.15M)
+    // =========================================================================
+    // BỘ CỬA NHÔM XINGFA CÓ NAN XƯƠNG ĐI RA SAU NHÀ (NGANG 1.08M, CAO 2.15M)
+    // Hệ nhôm Xingfa hệ 55 màu xám đen, chia đố xương ngang chịu lực & nan hoa đồng quả trám 3D
+    // =========================================================================
     const rearDoorGroup = new THREE.Group();
-    // Khung bao nhôm Xingfa
-    const rDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW, rearDoorH, 0.08), matMetalBlack);
-    rDoorFrame.position.set(0, rearDoorH / 2, 0);
-    // Cánh cửa kính nhôm Xingfa an toàn (hơi hé mở để thể hiện lối đi ra sau)
-    const rDoorLeaf = new THREE.Group();
-    const rLeafFrame = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW - 0.08, rearDoorH - 0.08, 0.045), matMetalBlack);
-    rLeafFrame.position.set(0, (rearDoorH - 0.08) / 2, 0);
-    const rLeafGlass = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW - 0.24, rearDoorH - 0.24, 0.015), matGlass);
-    rLeafGlass.position.set(0, (rearDoorH - 0.08) / 2, 0);
-    const rHandle = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.25, 0.08), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
-    rHandle.position.set((rearDoorW - 0.08)/2 - 0.06, 1.0, 0.04);
-    rDoorLeaf.add(rLeafFrame, rLeafGlass, rHandle);
-    rDoorLeaf.position.set(0, 0.04, 0);
-    // Cánh cửa mở hé nhẹ 25 độ ra phía sau
-    rDoorLeaf.rotation.y = 0.45;
-    rearDoorGroup.add(rDoorFrame, rDoorLeaf);
+    const rFrameThick = 0.055;
+    const rFrameDepth = 0.08;
+
+    // 1. Khung bao nhôm Xingfa 4 phía (Jambs, Header, Threshold Sill)
+    const rJambL = new THREE.Mesh(new THREE.BoxGeometry(rFrameThick, rearDoorH, rFrameDepth), matMetalBlack);
+    rJambL.position.set(-rearDoorW/2 + rFrameThick/2, rearDoorH/2, 0);
+    const rJambR = new THREE.Mesh(new THREE.BoxGeometry(rFrameThick, rearDoorH, rFrameDepth), matMetalBlack);
+    rJambR.position.set(rearDoorW/2 - rFrameThick/2, rearDoorH/2, 0);
+    const rHeadFrame = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW, rFrameThick, rFrameDepth), matMetalBlack);
+    rHeadFrame.position.set(0, rearDoorH - rFrameThick/2, 0);
+    const rSillFrame = new THREE.Mesh(new THREE.BoxGeometry(rearDoorW, 0.035, rFrameDepth + 0.03), matMetalBlack);
+    rSillFrame.position.set(0, 0.0175, 0);
+    rearDoorGroup.add(rJambL, rJambR, rHeadFrame, rSillFrame);
+
+    // Kích thước lọt lòng cánh cửa
+    const rInnerW = rearDoorW - 2 * rFrameThick; // 0.97m
+    const rInnerH = rearDoorH - rFrameThick - 0.035; // 2.06m
+    const rLeafW = rInnerW - 0.01; // 0.96m
+    const rLeafH = rInnerH - 0.01; // 2.05m
+    const rLeafThick = 0.045;
+    const rStileW = 0.085; // Bản cánh nhôm Xingfa hệ 55 chuẩn 85mm
+    const rKickRailH = 0.12; // Đố đáy chân cửa chịu lực chống va đập 120mm
+
+    // 2. Cánh cửa đi Xingfa có xương (Gắn trục quay bản lề bên trái, mở hé 22 độ ra sau)
+    const rDoorHingePivot = new THREE.Group();
+    // Đặt trục bản lề tại mép trái khung bao
+    rDoorHingePivot.position.set(-rearDoorW/2 + rFrameThick + 0.005, 0.04, 0);
+
+    const rLeafGroup = new THREE.Group();
+
+    // Khung cánh 4 cạnh: Đố đứng trái, đố đứng phải, đố ngang trên, đố chân đáy
+    const rStileL = new THREE.Mesh(new THREE.BoxGeometry(rStileW, rLeafH, rLeafThick), matMetalBlack);
+    rStileL.position.set(rStileW/2, rLeafH/2, 0);
+    const rStileR = new THREE.Mesh(new THREE.BoxGeometry(rStileW, rLeafH, rLeafThick), matMetalBlack);
+    rStileR.position.set(rLeafW - rStileW/2, rLeafH/2, 0);
+    const rRailTop = new THREE.Mesh(new THREE.BoxGeometry(rLeafW - 2*rStileW, rStileW, rLeafThick), matMetalBlack);
+    rRailTop.position.set(rLeafW/2, rLeafH - rStileW/2, 0);
+    const rRailBottom = new THREE.Mesh(new THREE.BoxGeometry(rLeafW - 2*rStileW, rKickRailH, rLeafThick), matMetalBlack);
+    rRailBottom.position.set(rLeafW/2, rKickRailH/2, 0);
+    rLeafGroup.add(rStileL, rStileR, rRailTop, rRailBottom);
+
+    // Kích thước ô lọt sáng giữa khung cánh
+    const rClearW = rLeafW - 2 * rStileW; // 0.79m
+    const rClearH = rLeafH - rStileW - rKickRailH; // 1.845m (từ Y = 0.12m đến Y = 1.965m)
+    const rGlassBaseY = rKickRailH; // 0.12m
+
+    // 3. HỆ ĐỐ XƯƠNG NHÔM NGANG CHỊU LỰC & CHIA Ô BẢO VỆ CHỐNG TRỘM ("CỬA CÓ XƯƠNG")
+    // A. Đố xương ngang chính giữa (Bụng cửa ngang tầm tay gạt Y = 1.02m)
+    const rMidRibH = 0.085; // Đố bụng bản lớn 85mm
+    const rMidRibY = 1.02;
+    const rMidRib = new THREE.Mesh(new THREE.BoxGeometry(rClearW, rMidRibH, rLeafThick), matMetalBlack);
+    rMidRib.position.set(rLeafW/2, rMidRibY, 0);
+    rLeafGroup.add(rMidRib);
+
+    // B. Các thanh đố xương ngang phụ chia nhỏ ô kính (tăng độ an toàn chịu lực)
+    const rSubRibH = 0.045; // Đố xương phụ bản 45mm
+    const rSubRibYs = [0.57, 1.35, 1.68];
+    rSubRibYs.forEach(y => {
+      const rib = new THREE.Mesh(new THREE.BoxGeometry(rClearW, rSubRibH, rLeafThick * 0.95), matMetalBlack);
+      rib.position.set(rLeafW/2, y, 0);
+      rLeafGroup.add(rib);
+    });
+
+    // 4. KÍNH CƯỜNG LỰC & HỆ NAN HOA ĐỒNG QUẢ TRÁM NỔI ĐỒNG BỘ NGHỆ THUẬT
+    const rPanels = [
+      { y1: rGlassBaseY, y2: 0.57 - rSubRibH/2 },
+      { y1: 0.57 + rSubRibH/2, y2: rMidRibY - rMidRibH/2 },
+      { y1: rMidRibY + rMidRibH/2, y2: 1.35 - rSubRibH/2 },
+      { y1: 1.35 + rSubRibH/2, y2: 1.68 - rSubRibH/2 },
+      { y1: 1.68 + rSubRibH/2, y2: rLeafH - rStileW }
+    ];
+
+    rPanels.forEach((panel) => {
+      const pH = panel.y2 - panel.y1;
+      const pMidY = (panel.y1 + panel.y2) / 2;
+      // Tấm kính cường lực an toàn
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(rClearW - 0.01, pH - 0.01, 0.015), matGlass);
+      glass.position.set(rLeafW/2, pMidY, 0);
+      rLeafGroup.add(glass);
+
+      // Nan chỉ đồng quả trám mỹ thuật đúc nổi tại tâm mỗi ô kính (thấy được từ cả 2 mặt)
+      const medR = Math.min(rClearW * 0.1, pH * 0.28, 0.038);
+      const medallionOut = createDiamondMedallion(medR);
+      medallionOut.position.set(rLeafW/2, pMidY, 0.008);
+      const medallionIn = medallionOut.clone();
+      medallionIn.position.z = -0.008;
+      medallionIn.scale.z = -1;
+      rLeafGroup.add(medallionOut, medallionIn);
+
+      // Nan chỉ viền vàng kim xung quanh ô kính
+      const borderL = new THREE.Mesh(new THREE.BoxGeometry(0.005, pH - 0.02, 0.005), matGoldGrid);
+      borderL.position.set(rLeafW/2 - rClearW/2 + 0.06, pMidY, 0.006);
+      const borderR = new THREE.Mesh(new THREE.BoxGeometry(0.005, pH - 0.02, 0.005), matGoldGrid);
+      borderR.position.set(rLeafW/2 + rClearW/2 - 0.06, pMidY, 0.006);
+      rLeafGroup.add(borderL, borderR);
+    });
+
+    // Trục nan dọc bằng đồng liên kết thông suốt các tầng xương
+    const rVerticalGoldRib = new THREE.Mesh(new THREE.BoxGeometry(0.008, rClearH, 0.008), matGoldGrid);
+    rVerticalGoldRib.position.set(rLeafW/2, rGlassBaseY + rClearH/2, 0.006);
+    rLeafGroup.add(rVerticalGoldRib);
+
+    // 5. BỘ PHỤ KIỆN KHÓA TAY GẠT ĐA ĐIỂM XINGFA & BẢN LỀ 3D
+    const rMatLock = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.15 });
+    const rLockBodyOut = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.28, 0.02), rMatLock);
+    rLockBodyOut.position.set(rLeafW - rStileW/2, rMidRibY, rLeafThick/2 + 0.008);
+    const rLeverHandleOut = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.024, 0.03), rMatLock);
+    rLeverHandleOut.position.set(rLeafW - rStileW/2 - 0.04, rMidRibY + 0.03, rLeafThick/2 + 0.03);
+
+    const rLockBodyIn = rLockBodyOut.clone();
+    rLockBodyIn.position.z = -rLeafThick/2 - 0.008;
+    const rLeverHandleIn = rLeverHandleOut.clone();
+    rLeverHandleIn.position.z = -rLeafThick/2 - 0.03;
+    rLeafGroup.add(rLockBodyOut, rLeverHandleOut, rLockBodyIn, rLeverHandleIn);
+
+    // 3 Bản lề 3D chịu lực bên mép trái
+    [0.25, rLeafH/2, rLeafH - 0.25].forEach(hingeY => {
+      const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.10, 16), matMetalBlack);
+      hinge.position.set(0.01, hingeY, 0.015);
+      rLeafGroup.add(hinge);
+    });
+
+    // Cánh mở hé nhẹ 22 độ (0.38 rad) ra phía sau
+    rLeafGroup.rotation.y = 0.38;
+    rDoorHingePivot.add(rLeafGroup);
+    rearDoorGroup.add(rDoorHingePivot);
+
     rearDoorGroup.position.set(rearDoorMidX, 0, Z0 + 0.1);
     gFloor.add(rearDoorGroup);
     // Tường hông trái - Chiều cao 4.0m
@@ -2341,8 +2460,8 @@
         // Góc nhìn trực diện vào Toilet dùng chung tầng trệt rộng 1.2m qua cửa đối diện tường
         resetCameraFocus(new THREE.Vector3(1.125, 1.2, -4.53), new THREE.Vector3(-0.65, 1.6, -4.35));
       } else if (view === 'backdoor') {
-        // Góc nhìn trực diện từ sảnh hành lang nhìn ra cửa sau nhà 1.08m x 2.15m
-        resetCameraFocus(new THREE.Vector3(-1.065, 1.3, Z0 + 0.1), new THREE.Vector3(-1.065, 1.45, -2.8));
+        // Góc nhìn trực diện từ phía sau nhà nhìn vào Cửa nhôm Xingfa có nan xương tầng trệt (khớp góc ảnh gia chủ)
+        resetCameraFocus(new THREE.Vector3(-1.065, 1.25, Z0 + 0.1), new THREE.Vector3(-1.5, 1.6, -8.8));
       } else if (view === 'iso') {
         resetCameraFocus(new THREE.Vector3(0, 7.5, 0), new THREE.Vector3(-18, 16, 22));
       } else if (view === 'top') {
