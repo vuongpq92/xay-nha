@@ -22,6 +22,7 @@ https://vuongpq92.github.io/xay-nha/
 - **Nha ve sinh tang tret**: Rong **1.20m**, bo tri bon cau khoi va ban da lavabo am ban, cua mo doi dien tuong hanh lang kin dao.
 - **Cua hau ra sau**: Kich thuoc **Ngang 1.08m x Cao 2.15m**, thang truc hanh lang tao luong doi luu khong khi xuyen suot ngoi nha.
 - **He cua so Lau 1 & Lau 2**: Cua so nhom Xingfa can giua mang tuong vat kich thuoc **Ngang 1.08m x Cao 2.15m**, hai ben la 2 mang tuong dac rong 0.92m che kin tu ao va tao the can bang doi xung.
+- **Ban cong thut vao (Loggia) & Cua di Lau 1 & Lau 2**: Mang tuong thang mat tien thut vao 1.0m tao ban cong rong 1.52m x sau 1.0m co lan can kinh 1.1m, lap cua di 1 canh Xingfa 0.85m x 2.20m mo ra ban cong don gio.
 
 ---
 
