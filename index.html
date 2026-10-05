@@ -2002,22 +2002,28 @@
     roofFloor.add(createWall(0.2, 3.2, tumLength, X1 - 0.1, 12.25, tumMidZ));
     roofFloor.add(createWall(0.2, 3.2, tumLength, X0 + 0.1, 12.25, tumMidZ));
 
-    // 3. Mặt trước Tum (tại Z = -0.765m) nhìn ra sân thượng trước có cửa đi nhôm kính Xingfa (0.9m x 2.2m)
+    // 3. Mặt trước Tum (tại Z = -0.765m) nhìn ra sân thượng trước: Cửa đi dời sang bên TRÁI
     const tumDoorW = 0.90;
     const tumDoorH = 2.20;
-    const tumWallPierW = (W - tumDoorW) / 2; // ~1.275m
-    // Trụ tường trái & phải mặt trước tum
-    roofFloor.add(createWall(tumWallPierW, 3.2, 0.2, -tumDoorW/2 - tumWallPierW/2, 12.25, tumFrontZ));
-    roofFloor.add(createWall(tumWallPierW, 3.2, 0.2, tumDoorW/2 + tumWallPierW/2, 12.25, tumFrontZ));
+    // Dời cửa lệch sang bên TRÁI (thẳng lối đi hành lang từ cầu thang lên)
+    const tumPierLeftW = 0.25; // Trụ tường góc trái
+    const tumDoorMidX = X0 + tumPierLeftW + tumDoorW / 2; // -1.725 + 0.25 + 0.45 = -1.025m
+    const tumPierRightW = W - tumPierLeftW - tumDoorW; // 3.45 - 0.25 - 0.90 = 2.30m (mảng tường đặc phòng thờ bên phải)
+    const tumPierRightMidX = X1 - tumPierRightW / 2; // 1.725 - 1.15 = +0.575m
+
+    // Trụ góc tường trái
+    roofFloor.add(createWall(tumPierLeftW, 3.2, 0.2, X0 + tumPierLeftW / 2, 12.25, tumFrontZ));
+    // Mảng tường đặc bên phải (tạo phòng thờ trang nghiêm rộng 2.30m)
+    roofFloor.add(createWall(tumPierRightW, 3.2, 0.2, tumPierRightMidX, 12.25, tumFrontZ));
     // Lanh tô trên cửa tum lên trần
     const tumLintelH = 3.2 - tumDoorH;
     const tumLintel = new THREE.Mesh(new THREE.BoxGeometry(tumDoorW, tumLintelH, 0.2), matWallWhite);
-    tumLintel.position.set(0, 12.25 + tumDoorH + tumLintelH/2, tumFrontZ);
+    tumLintel.position.set(tumDoorMidX, 12.25 + tumDoorH + tumLintelH/2, tumFrontZ);
     roofFloor.add(tumLintel);
 
-    // Cửa đi nhôm kính Xingfa mở ra sân thượng trước
+    // Cửa đi nhôm kính Xingfa mở ra sân thượng trước lệch bên trái
     const tumDoorGroup = new THREE.Group();
-    tumDoorGroup.position.set(0, 12.25, tumFrontZ);
+    tumDoorGroup.position.set(tumDoorMidX, 12.25, tumFrontZ);
     const tumDoorFrame = new THREE.Mesh(new THREE.BoxGeometry(tumDoorW, tumDoorH, 0.08), matMetalBlack);
     tumDoorFrame.position.set(0, tumDoorH/2, 0);
     const tumDoorGlass = new THREE.Mesh(new THREE.BoxGeometry(tumDoorW - 0.16, tumDoorH - 0.16, 0.015), matGlass);
@@ -2146,13 +2152,13 @@
     roofFloor.add(createRoundPlanter(-1.25, 3.45));
     roofFloor.add(createRoundPlanter(-0.55, 4.35));
 
-    // 9. Phòng thờ trang nghiêm bên trong Tum
+    // 9. Phòng thờ trang nghiêm bên trong Tum (tọa lạc vững chãi tại mảng tường đặc bên phải)
     const altar = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.6), matWoodDark);
-    altar.position.set(0, 12.8, tumMidZ + 0.6);
+    altar.position.set(0.60, 12.8, tumMidZ + 0.6);
     roofFloor.add(altar);
 
-    createWarmLight(0, 14.5, 2.5, 1.5, 6);
-    createWarmLight(0, 14.0, tumMidZ, 1.2, 5);
+    createWarmLight(0.60, 14.5, 2.5, 1.5, 6);
+    createWarmLight(0.60, 14.0, tumMidZ, 1.2, 5);
 
     // ==========================================
     // LOGIC ĐIỀU KHIỂN & ANIMATION (TWEEN)
