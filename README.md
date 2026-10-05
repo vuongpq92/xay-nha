@@ -21,9 +21,8 @@ https://vuongpq92.github.io/xay-nha/
 - **Cau thang tang tret**: Cau thang chu U dao chieu 180 do, ban thang rong **0.80m**, gom **21 bac cung Sinh**, chieu nghi tai cao do +2.00m, hanh lang ben hong rong **0.86m**.
 - **Nha ve sinh tang tret**: Rong **1.20m**, bo tri bon cau khoi va ban da lavabo am ban, cua mo doi dien tuong hanh lang kin dao.
 - **Cua hau ra sau**: Kich thuoc **Ngang 1.08m x Cao 2.15m**, thang truc hanh lang tao luong doi luu khong khi xuyen suot ngoi nha.
-- **He cua so Lau 1 & Lau 2**: Cua so nhom Xingfa can giua mang tuong vat kich thuoc **Ngang 1.08m x Cao 2.15m**, hai ben la 2 mang tuong dac rong 0.92m che kin tu ao va tao the can bang doi xung.
-- **Ban cong thut vao (Loggia) & Cua di Lau 1 & Lau 2**: Mang tuong thang mat tien thut vao 1.0m tao ban cong rong 1.52m x sau 1.0m co lan can kinh 1.1m, lap cua di 1 canh Xingfa 0.85m x 2.20m mo ra ban cong don gio.
-- **Cua so phong sau Lau 1 & Lau 2**: Cua so 2 canh nhom Xingfa tai tuong hong trai phong ngu sau kich thuoc **Ngang 1.08m x Cao 1.26m** (bau cua cao 0.90m, da lanh-to cao 1.84m), lay tron sang va thong gio tu nhien cho phong ngu sau.
+- **He cua so dong nhat Lau 1 & Lau 2 (Mat tien vat & Tuong hong phong sau)**: Tat ca 4 cua so deu dong nhat kich thuoc **Ngang 1.08m x Cao 1.26m** (bau cua cao 0.90m, da lanh-to cao 1.84m). Thiet ke chuan theo anh mau thuc te: O fix kinh suot lay sang phia tren cao 0.34m, phia duoi la 2 canh mo nhom Xingfa xam den lap nan hoa dong mang hoa van qua tram noi 3D (Diamond Medallions) sang trong.
+- **Ban cong thut vao (Loggia) & Cua di Xingfa 2 canh Lau 1 & Lau 2**: Mang tuong thang mat tien thut vao 1.0m tao ban cong rong 1.52m x sau 1.0m co lan can kinh 1.1m, lap **bo cua di 2 canh nhom kinh Xingfa co o fix tren kich thuoc Ngang 1.20m x Cao 2.36m** (chuan theo anh mau thuc te), canh mo quay ra ban công, den LED tran chieu sang am cúng loai bo hoan toan khoang toi.
 
 ---
 
