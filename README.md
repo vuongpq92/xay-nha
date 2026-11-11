@@ -45,3 +45,33 @@ Sau khi kich hoat GitHub Pages, truy cap truc tiep tai:
   - **Auto Camera FOV**: Tu dong can chinh goc nhin rong (FOV 54) khi cam doc dien thoai de bao quat toan bo 15.5m chieu cao toa nha.
 
 
+
+
+---
+
+## Cập Nhật Thiết Kế Nội Thất Chi Tiết Toàn Nhà (4 Tầng)
+
+Toàn bộ nội thất trên mô hình 3D [`index.html`](index.html) đã được nâng cấp đồng bộ theo phong cách **Hiện Đại Tối Giản Ấm Áp (Modern Minimalist Warmth)**:
+
+### 1. Tầng Trệt (`gFurn`)
+- **Sảnh vào & Tủ giày thông minh**: Bố trí sát tường phải gần cửa chính 4 cánh góc xéo gồm tủ giày kịch trần + ghế ngồi thay giày + hắt LED gầm.
+- **Khu vực Phòng Khách**: Nâng cấp vách Tivi ốp đá Marble kết hợp lam sóng gỗ hai bên và hắt đèn LED ấm, bổ sung tủ trưng bày/rượu cánh kính bên hông cầu thang; ốp lam sóng gỗ sồi + tranh trang trí sau lưng Sofa.
+
+### 2. Lầu 1 (`f1Furn`)
+- **Phòng Ngủ Master**: Giường King 1.8m x 2.0m tựa vách lam sóng gỗ sồi nẹp chỉ đồng & LED hắt ấm, 2 tab đầu giường, tủ quần áo cánh kính khói khung nhôm đen kịch trần kết hợp khoang Tivi âm, bàn trang điểm treo với gương Oval LED và rèm 2 lớp tại cửa ban công Loggia.
+- **Toilet Lầu 1 & Lầu 2**: Chuẩn hóa qua helper dùng chung `createStandardFloorToilet` và `createStairRearPartition` đảm bảo đồng trục MEP tuyệt đối (ngang 2.0m x dọc 1.2m).
+
+### 3. Lầu 2 (`f2Furn`)
+- **Phòng Ngủ 3 (Phía trước)**: Giường đôi 1.6m x 2.0m có 2 ngăn kéo dưới gầm, bàn học chữ L đón sáng cửa sổ vát + ghế công thái học, tủ áo 3 cánh gỗ sồi phối trắng.
+- **Phòng Làm Việc & Thư Viện Sách (Khoang sau)**: Vách ngăn sau cầu thang đồng bộ Lầu 1; bàn làm việc đôi 1.65m x 0.65m với 2 màn hình & 2 ghế công thái học; hệ tủ sách kịch trần hắt LED ấm áp sát tường phải và góc daybed đọc sách bên cửa sổ hông; bổ sung **Toilet Lầu 2** đồng trục.
+
+### 4. Tầng Tum & Sân Thượng (`roofFloor`)
+- **Phòng Thờ Trang Nghiêm**: Bàn thờ gỗ gụ/hương 3 cấp (1.27m x 0.61m) áp vách đặc bên phải, đĩa tròn Trúc Chỉ hoa sen phát sáng vàng ấm, vách CNC ngăn tách khu giặt sấy (máy giặt/máy sấy xếp chồng + tủ hóa chất + sào phơi).
+- **Sân Thượng & Pergola**: Bổ sung mái kính cường lực màu trà chống UV trên hệ nan lam và dây đèn Edison ngoài trời.
+
+### 5. Góc Nhìn Camera Mới Trên Mô Hình 3D
+Đã bổ sung 4 góc nhìn trực tiếp vào nội thất từng phòng trên Desktop & Mobile: `master` (Master Lầu 1), `bedroom3` (Phòng Ngủ 3), `office` (Làm Việc Lầu 2), và `altar` (Phòng Thờ Tum).
+
+| Phòng Ngủ Master Lầu 1 | Phòng Ngủ 3 Lầu 2 | Phòng Làm Việc Lầu 2 | Phòng Thờ Tum |
+| :---: | :---: | :---: | :---: |
+| ![Master Lầu 1](phong_ngu_master_lau_1.jpg) | ![Phòng Ngủ 3 Lầu 2](phong_ngu_3_lau_2.jpg) | ![Phòng Làm Việc Lầu 2](phong_lam_viec_lau_2.jpg) | ![Phòng Thờ Tum](phong_tho_tum_trang_nghiem.jpg) |
