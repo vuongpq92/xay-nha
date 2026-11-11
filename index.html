@@ -2697,86 +2697,152 @@
     // =========================================================================
     createStairRearPartition(4.0, f1Furn);
 
-    // B. KHÔNG GIAN BẾP & PHÒNG ĂN LẦU 1 (Z: -0.82m -> -4.065m)
+    // B. KHÔNG GIAN BẾP & PHÒNG ĂN LẦU 1 (Z: -0.895m -> -3.99m, Cốt mặt sàn f1SurfY = 4.25m)
+    // Thiết kế Chữ L tách biệt: Khu Khô/Nấu bên tường phải (Tủ lạnh + Bếp từ) & Khu Ướt quay lưng vào Toilet (Bồn rửa chén + Máy giặt âm bàn đá)
     const kitchenGroup = new THREE.Group();
+    const matCabSlate = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+    const matCabWhite = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.3 });
+    const matMarbleKitchen = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.15 });
+    const matSageGlass = new THREE.MeshStandardMaterial({ color: 0x99f6e4, transparent: true, opacity: 0.45, roughness: 0.15 });
 
-    // 1. Hệ Tủ bếp chữ L cao cấp áp sát tường hông phải và vách ngăn WC
-    // Tủ bếp dưới mặt đá Marble trắng vân mây (chạy dọc tường phải từ Z = -1.4m đến -4.0m)
-    const counterLen = 2.65;
-    const baseCounter = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.82, counterLen), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 }));
-    baseCounter.position.set(X1 - 0.30, 4.0 + 0.41, -2.725);
-    const marbleTop = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.04, counterLen + 0.02), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
-    marbleTop.position.set(X1 - 0.30, 4.0 + 0.84, -2.725);
+    // 1. KHOANG TỦ LẠNH SIDE-BY-SIDE KỊCH TRẦN (Góc Đông-Bắc: X = +1.15m, Z = -1.34m, cánh quay sang trái -X)
+    const fridgeAlcove = new THREE.Group();
+    const fridgeBox = new THREE.Mesh(new THREE.BoxGeometry(0.70, 1.85, 0.82), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.55, roughness: 0.25 }));
+    fridgeBox.position.set(1.15, f1SurfY + 0.925, -1.34);
+    const fridgeSeam = new THREE.Mesh(new THREE.BoxGeometry(0.015, 1.80, 0.015), matMetalBlack);
+    fridgeSeam.position.set(0.795, f1SurfY + 0.925, -1.34);
+    const fridgeHandleL = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.45, 0.015), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.85 }));
+    fridgeHandleL.position.set(0.79, f1SurfY + 1.05, -1.38);
+    const fridgeHandleR = fridgeHandleL.clone();
+    fridgeHandleR.position.set(0.79, f1SurfY + 1.05, -1.30);
+    // Hộc tủ bao kịch trần trên nóc tủ lạnh & vách cách nhiệt cạnh bếp từ
+    const fridgeTopCab = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.93, 0.86), matCabSlate);
+    fridgeTopCab.position.set(1.16, f1SurfY + 2.385, -1.34);
+    const fridgeSidePanel = new THREE.Mesh(new THREE.BoxGeometry(0.72, 2.85, 0.025), matWood);
+    fridgeSidePanel.position.set(1.16, f1SurfY + 1.425, -1.77);
+    const fridgeRearPanel = fridgeSidePanel.clone();
+    fridgeRearPanel.position.set(1.16, f1SurfY + 1.425, -0.91);
+    fridgeAlcove.add(fridgeBox, fridgeSeam, fridgeHandleL, fridgeHandleR, fridgeTopCab, fridgeSidePanel, fridgeRearPanel);
+    kitchenGroup.add(fridgeAlcove);
 
-    // Bếp từ âm đôi 2 vùng nấu màu đen sang trọng
+    // 2. NHÁNH DÀI KHU KHÔ DỌC TƯỜNG PHẢI (Z = -1.78m -> -3.99m, dài 2.21m, sâu 0.62m)
+    const rightBranchLen = 2.21;
+    const rightBranchMidZ = -2.885;
+    const baseCounterR = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.85, rightBranchLen), matCabSlate);
+    baseCounterR.position.set(X1 - 0.20 - 0.31, f1SurfY + 0.425, rightBranchMidZ);
+    const marbleTopR = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.04, rightBranchLen + 0.01), matMarbleKitchen);
+    marbleTopR.position.set(X1 - 0.20 - 0.32, f1SurfY + 0.87, rightBranchMidZ);
+
+    // Bếp từ âm đôi 2 vùng nấu & Máy hút mùi (Z = -2.42m)
     const inductionCooker = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.015, 0.70), new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.1 }));
-    inductionCooker.position.set(X1 - 0.30, 4.0 + 0.865, -2.20);
+    inductionCooker.position.set(X1 - 0.51, f1SurfY + 0.898, -2.42);
     const burner1 = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 0.01, 16), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
-    burner1.position.set(X1 - 0.30, 4.0 + 0.875, -2.35);
+    burner1.position.set(X1 - 0.51, f1SurfY + 0.908, -2.57);
     const burner2 = burner1.clone();
-    burner2.position.set(X1 - 0.30, 4.0 + 0.875, -2.05);
+    burner2.position.set(X1 - 0.51, f1SurfY + 0.908, -2.27);
+    const rangeHood = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.28, 0.70), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.85 }));
+    rangeHood.position.set(X1 - 0.44, f1SurfY + 1.62, -2.42);
 
-    // Chậu rửa bát Inox 304 hai hố liền khối + vòi cổ ngỗng nóng lạnh
-    const sinkInox = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.18, 0.80), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9 }));
-    sinkInox.position.set(X1 - 0.30, 4.0 + 0.78, -3.35);
-    const kitchenFaucet = new THREE.Mesh(new THREE.TorusGeometry(0.10, 0.014, 8, 16, Math.PI), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95 }));
-    kitchenFaucet.position.set(X1 - 0.12, 4.0 + 1.05, -3.35);
-    kitchenFaucet.rotation.z = Math.PI / 2;
+    // Tủ bếp trên nhánh phải 2 tầng (trắng + gỗ sồi kịch trần) + kính ốp bếp & LED hắt
+    const backsplashR = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.68, rightBranchLen), matSageGlass);
+    backsplashR.position.set(X1 - 0.21, f1SurfY + 1.23, rightBranchMidZ);
+    const kLedR = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.015, rightBranchLen - 0.04), matWarmLedStrip);
+    kLedR.position.set(X1 - 0.36, f1SurfY + 1.56, rightBranchMidZ);
+    const upperCabRWhite = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.72, rightBranchLen), matCabWhite);
+    upperCabRWhite.position.set(X1 - 0.20 - 0.175, f1SurfY + 1.93, rightBranchMidZ);
+    const upperCabROak = new THREE.Mesh(new THREE.BoxGeometry(0.37, 0.56, rightBranchLen), matWood);
+    upperCabROak.position.set(X1 - 0.20 - 0.185, f1SurfY + 2.57, rightBranchMidZ);
+    kitchenGroup.add(baseCounterR, marbleTopR, inductionCooker, burner1, burner2, rangeHood, backsplashR, kLedR, upperCabRWhite, upperCabROak);
 
-    // Tủ bếp trên kịch trần (từ 5.5m lên 7.8m, sâu 0.35m)
-    const upperCabinet = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.20, counterLen), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 }));
-    upperCabinet.position.set(X1 - 0.175, 4.0 + 2.30, -2.725);
+    // 3. NHÁNH ƯỚT QUAY LƯNG VÀO VÁCH TOILET (Z = -3.68m, từ X = +0.905m sang trái tới X = -0.275m)
+    // Chậu rửa nằm dưới vách WC (X = +0.62m) & Máy giặt lồng ngang âm bàn đá bên trái (X = +0.025m)
+    const backCabL = new THREE.Mesh(new THREE.BoxGeometry(0.60, 0.85, 0.62), matCabSlate);
+    backCabL.position.set(0.605, f1SurfY + 0.425, -3.68);
+    // Hồi gỗ nẹp trái kết thúc bàn bếp gọn tại mép vách WC (X = -0.275m)
+    const washerEndPanel = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.88, 0.62), matCabSlate);
+    washerEndPanel.position.set(-0.265, f1SurfY + 0.44, -3.68);
+    // Mặt đá nhánh L nối liền từ góc tủ phải tới mép vách WC (rộng 1.19m)
+    const marbleTopL = new THREE.Mesh(new THREE.BoxGeometry(1.19, 0.04, 0.64), matMarbleKitchen);
+    marbleTopL.position.set(0.315, f1SurfY + 0.88, -3.67);
 
-    // Máy hút mùi Inox kính cong phía trên bếp từ
-    const rangeHood = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.35, 0.70), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.85 }));
-    rangeHood.position.set(X1 - 0.28, 4.0 + 1.90, -2.20);
+    // Chậu rửa bát Inox 304 (0.62m x 0.44m) quay lưng vào vách Toilet (Z = -3.99m)
+    const sinkRim = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.015, 0.44), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.85 }));
+    sinkRim.position.set(0.61, f1SurfY + 0.903, -3.66);
+    const sinkBasin = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.14, 0.38), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.25 }));
+    sinkBasin.position.set(0.61, f1SurfY + 0.835, -3.66);
+    const kitchenFaucetNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.22, 8), matMetalBlack);
+    kitchenFaucetNeck.position.set(0.61, f1SurfY + 1.01, -3.91);
+    const kitchenFaucet = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.013, 8, 16, Math.PI), matMetalBlack);
+    kitchenFaucet.rotation.y = Math.PI / 2;
+    kitchenFaucet.position.set(0.61, f1SurfY + 1.12, -3.83);
 
-    // Tủ lạnh 2 cánh Side-by-side lớn (0.90m x 0.75m x 1.85m) màu xám titan sang trọng
-    const fridge = new THREE.Mesh(new THREE.BoxGeometry(0.90, 1.85, 0.75), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6, roughness: 0.2 }));
-    fridge.position.set(X1 - 0.45, 4.0 + 0.925, -1.25);
-    const fridgeDoorLine = new THREE.Mesh(new THREE.BoxGeometry(0.01, 1.80, 0.01), matMetalBlack);
-    fridgeDoorLine.position.set(X1 - 0.45, 4.0 + 0.925, -0.87);
+    // Máy giặt lồng ngang âm dưới mặt đá bếp (X = +0.025m, Z = -3.68m, lồng kính quay ra trước +Z)
+    const washerKitchenGroup = new THREE.Group();
+    const wBody = new THREE.Mesh(new THREE.BoxGeometry(0.57, 0.84, 0.58), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.25 }));
+    wBody.position.set(0, 0.42, 0);
+    const wDrumBezel = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 0.03, 24), matMetalBlack);
+    wDrumBezel.rotation.x = Math.PI / 2;
+    wDrumBezel.position.set(0, 0.44, 0.295);
+    const wDrumGlass = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.035, 24), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.1 }));
+    wDrumGlass.rotation.x = Math.PI / 2;
+    wDrumGlass.position.set(0, 0.44, 0.30);
+    const wSoapDrawer = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.08, 0.02), new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 }));
+    wSoapDrawer.position.set(-0.18, 0.76, 0.295);
+    const wDisplayLed = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.06, 0.02), new THREE.MeshStandardMaterial({ color: 0x0f172a, emissive: 0x38bdf8, emissiveIntensity: 0.4 }));
+    wDisplayLed.position.set(0.15, 0.76, 0.295);
+    washerKitchenGroup.add(wBody, wDrumBezel, wDrumGlass, wSoapDrawer, wDisplayLed);
+    washerKitchenGroup.position.set(0.025, f1SurfY, -3.68);
 
-    kitchenGroup.add(baseCounter, marbleTop, inductionCooker, burner1, burner2, sinkInox, kitchenFaucet, upperCabinet, rangeHood, fridge, fridgeDoorLine);
+    // Tủ bếp trên nhánh vách Toilet + Kính ốp bếp xanh xám & LED hắt
+    const backLenUpper = 1.18;
+    const backMidUpperX = 0.315;
+    const backsplashL = new THREE.Mesh(new THREE.BoxGeometry(backLenUpper, 0.68, 0.015), matSageGlass);
+    backsplashL.position.set(backMidUpperX, f1SurfY + 1.23, -3.98);
+    const kLedL = new THREE.Mesh(new THREE.BoxGeometry(backLenUpper - 0.04, 0.015, 0.02), matWarmLedStrip);
+    kLedL.position.set(backMidUpperX, f1SurfY + 1.56, -3.82);
+    const upperCabLWhite = new THREE.Mesh(new THREE.BoxGeometry(backLenUpper, 0.72, 0.35), matCabWhite);
+    upperCabLWhite.position.set(backMidUpperX, f1SurfY + 1.93, -3.81);
+    const upperCabLOak = new THREE.Mesh(new THREE.BoxGeometry(backLenUpper, 0.56, 0.37), matWood);
+    upperCabLOak.position.set(backMidUpperX, f1SurfY + 2.57, -3.80);
 
-    // 2. Bộ Bàn Ăn Gia Đình 6 Ghế Sang Trọng (Đặt giữa phòng hướng ra cửa sổ hông đón gió)
+    kitchenGroup.add(backCabL, washerEndPanel, marbleTopL, sinkRim, sinkBasin, kitchenFaucetNeck, kitchenFaucet, washerKitchenGroup, backsplashL, kLedL, upperCabLWhite, upperCabLOak);
+
+    // 4. BỘ BÀN ĂN 4 GHẾ ĐẶT GỌN DƯỚI CỬA SỔ HÔNG TRÁI (1.20m x 0.72m tại X = -1.08m, Z = -2.65m)
     const diningTableGroup = new THREE.Group();
-    // Mặt bàn ăn đá Ceramic trắng vân mây bo viền
-    const diningTableTop = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.035, 1.45), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
+    const diningTableTop = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.035, 1.20), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
     diningTableTop.position.set(0, 0.75, 0);
-    // 4 chân bàn thép sơn tĩnh điện đen chữ V
-    const leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.73, 0.05), matMetalBlack);
-    leg1.position.set(-0.35, 0.365, -0.62);
-    const leg2 = leg1.clone(); leg2.position.set(0.35, 0.365, -0.62);
-    const leg3 = leg1.clone(); leg3.position.set(-0.35, 0.365, 0.62);
-    const leg4 = leg1.clone(); leg4.position.set(0.35, 0.365, 0.62);
+    const leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.73, 0.045), matMetalBlack);
+    leg1.position.set(-0.29, 0.365, -0.51);
+    const leg2 = leg1.clone(); leg2.position.set(0.29, 0.365, -0.51);
+    const leg3 = leg1.clone(); leg3.position.set(-0.29, 0.365, 0.51);
+    const leg4 = leg1.clone(); leg4.position.set(0.29, 0.365, 0.51);
     diningTableGroup.add(diningTableTop, leg1, leg2, leg3, leg4);
 
-    // 4 Ghế ăn bọc da màu nâu cam ấm cúng hai bên bàn
+    // 4 Ghế ăn bọc da màu nâu da bò (2 ghế phía trong + 2 ghế hai đầu bàn chừa hành lang > 1.05m)
     const diningChairPositions = [
-      { x: -0.65, z: -0.38, rotY: Math.PI / 2 },
-      { x: -0.65, z: 0.38, rotY: Math.PI / 2 },
-      { x: 0.65, z: -0.38, rotY: -Math.PI / 2 },
-      { x: 0.65, z: 0.38, rotY: -Math.PI / 2 },
+      { x: 0.54, z: -0.32, rotY: -Math.PI / 2 },
+      { x: 0.54, z: 0.32, rotY: -Math.PI / 2 },
+      { x: 0, z: -0.78, rotY: 0 },
+      { x: 0, z: 0.78, rotY: Math.PI },
     ];
     diningChairPositions.forEach(cp => {
       const chairG = new THREE.Group();
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.04, 0.40), new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.6 }));
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.04, 0.38), new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.6 }));
       seat.position.set(0, 0.45, 0);
-      const back = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.42, 0.04), new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.6 }));
-      back.position.set(0, 0.66, -0.18);
+      const back = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.40, 0.04), new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.6 }));
+      back.position.set(0, 0.65, -0.17);
       const chairLeg = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.45, 0.03), matMetalBlack);
-      chairLeg.position.set(-0.16, 0.225, -0.16);
-      const cl2 = chairLeg.clone(); cl2.position.set(0.16, 0.225, -0.16);
-      const cl3 = chairLeg.clone(); cl3.position.set(-0.16, 0.225, 0.16);
-      const cl4 = chairLeg.clone(); cl4.position.set(0.16, 0.225, 0.16);
+      chairLeg.position.set(-0.15, 0.225, -0.15);
+      const cl2 = chairLeg.clone(); cl2.position.set(0.15, 0.225, -0.15);
+      const cl3 = chairLeg.clone(); cl3.position.set(-0.15, 0.225, 0.15);
+      const cl4 = chairLeg.clone(); cl4.position.set(0.15, 0.225, 0.15);
       chairG.add(seat, back, chairLeg, cl2, cl3, cl4);
       chairG.position.set(cp.x, 0, cp.z);
       chairG.rotation.y = cp.rotY;
       diningTableGroup.add(chairG);
     });
 
-    diningTableGroup.position.set(-0.35, 4.0, -2.60);
+    diningTableGroup.position.set(-1.08, f1SurfY, -2.65);
     kitchenGroup.add(diningTableGroup);
     f1Furn.add(kitchenGroup);
 
@@ -3351,8 +3417,10 @@
         // Góc nhìn trực diện vào Toilet dùng chung tầng trệt (ngang 2.0m x dọc 1.2m) từ hành lang
         resetCameraFocus(new THREE.Vector3(0.725, 1.2, -4.665), new THREE.Vector3(-1.8, 1.7, -4.665));
       } else if (view === 'kitchen') {
-        // Góc nhìn trực diện vào Bếp & Bàn ăn Lầu 1 (khoang sau Z in [-0.82, -4.065])
-        resetCameraFocus(new THREE.Vector3(0.0, 5.2, -2.6), new THREE.Vector3(-1.8, 5.8, 0.2));
+        // Góc nhìn trực diện vào Bếp chữ L Lầu 1 (Bồn rửa & Máy giặt quay lưng vào WC, Tủ lạnh & Bếp từ bên phải, Bàn ăn bên trái)
+        if (!floorGroups[1].visible) window.setFloorMode('all');
+        const yOff1k = floorGroups[1].visible ? floorGroups[1].position.y : 0;
+        resetCameraFocus(new THREE.Vector3(0.20, 5.20 + yOff1k, -3.20), new THREE.Vector3(-1.15, 6.20 + yOff1k, -0.95));
       } else if (view === 'master') {
         // Góc nhìn nội thất Phòng Ngủ Master Lầu 1 (giường King, vách lam sóng, tủ kính khói & bàn phấn)
         if (!floorGroups[1].visible) window.setFloorMode('all');

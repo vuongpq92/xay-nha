@@ -75,3 +75,11 @@ Toàn bộ nội thất trên mô hình 3D [`index.html`](index.html) đã đư�
 | Phòng Ngủ Master Lầu 1 | Phòng Ngủ 3 Lầu 2 | Phòng Làm Việc Lầu 2 | Phòng Thờ Tum |
 | :---: | :---: | :---: | :---: |
 | ![Master Lầu 1](phong_ngu_master_lau_1.jpg) | ![Phòng Ngủ 3 Lầu 2](phong_ngu_3_lau_2.jpg) | ![Phòng Làm Việc Lầu 2](phong_lam_viec_lau_2.jpg) | ![Phòng Thờ Tum](phong_tho_tum_trang_nghiem.jpg) |
+
+
+### Cập Nhật Khoang Bếp Lầu 1 (`kitchenGroup` — Chữ L Tách Khu Khô & Khu Ướt)
+- **Khu Khô & Nấu Nướng (Tường Phải `X = +1.525m`):** Khoang Tủ lạnh Side-by-Side kịch trần (`0.70m x 0.82m x 1.85m`) tại góc Đông-Bắc (`X = +1.15m, Z = -1.34m`, cánh mở hướng `-X`), liền kề mặt đá bàn soạn + bếp từ âm đôi & máy hút mùi (`Z = -2.42m`).
+- **Khu Ướt Quay Lưng Vào Toilet (`Z = -3.68m`):** Bồn rửa chén Inox 304 + vòi cổ ngỗng (`X = +0.61m`) quay lưng thẳng vào vách Toilet `Z = -3.99m`, cạnh bên trái là **Máy giặt lồng ngang âm bàn đá** (`X = +0.025m`), gom chung đường cấp thoát nước xuyên vách vào hộp gen WC Lầu 1.
+- **Khu Bàn Ăn (`X = -1.08m, Z = -2.65m`):** Dời bộ bàn ăn 4 ghế về dưới cửa sổ hông trái (`1.08m x 1.26m`), mở thông hành lang trung tâm rộng `> 1.05m` và chuẩn hóa toàn bộ cốt đặt lên mặt sàn `4.25m`.
+
+![Phối cảnh 3D Bếp Lầu 1 mới](bep_an_lau_1_moi.jpg)
