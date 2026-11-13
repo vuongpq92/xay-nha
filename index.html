@@ -600,6 +600,7 @@
         <button class="btn-mini" onclick="setCameraView('hallway')">Hành Lang 0.86m</button>
         <button class="btn-mini" onclick="setCameraView('wc')">Toilet Tầng Trệt</button>
         <button class="btn-mini" onclick="setCameraView('master')">🛏️ Master Lầu 1</button>
+        <button class="btn-mini" onclick="setCameraView('partition')">🖼️ Vách Kính Thang L1</button>
         <button class="btn-mini" onclick="setCameraView('kitchen')">🍳 Bếp & WC Lầu 1</button>
         <button class="btn-mini" onclick="setCameraView('bedroom3')">🛏️ Phòng Ngủ 3 L2</button>
         <button class="btn-mini" onclick="setCameraView('office')">💻 Làm Việc Lầu 2</button>
@@ -659,6 +660,7 @@
     <span class="cam-pill" onclick="setCameraView('stair')">🪜 Cầu Thang U</span>
     <span class="cam-pill" onclick="setCameraView('wc')">🚽 Toilet Trệt</span>
     <span class="cam-pill" onclick="setCameraView('master')">🛏️ Master Lầu 1</span>
+    <span class="cam-pill" onclick="setCameraView('partition')">🖼️ Vách Kính Thang</span>
     <span class="cam-pill" onclick="setCameraView('kitchen')">🍳 Bếp Lầu 1</span>
     <span class="cam-pill" onclick="setCameraView('bedroom3')">🛏️ Phòng Ngủ 3</span>
     <span class="cam-pill" onclick="setCameraView('office')">💻 Làm Việc L2</span>
@@ -2601,6 +2603,252 @@
       return partGroup;
     }
 
+    // =========================================================================
+    // VÁCH NGĂN KIẾN TRÚC CAO CẤP CẦU THANG - BẾP LẦU 1 (Z = -0.82m)
+    // Thực hiện Combo 1+2 (Approved Design Plan):
+    // 1. Góc phải (sau tủ lạnh): Tường đặc + ốp lam sóng gỗ sồi kịch trần + dải LED dọc
+    // 2. Mảng giữa (1.59m): Chân tường lửng + vách kính sọc dọc khung Slim lấy sáng giếng thang
+    // 3. Bên trong bếp: Quầy Coffee Station & tủ Pantry mặt đá trắng sang trọng
+    // 4. Cửa đi (0.90m): Cửa kính khung nhôm Slim kính sọc dọc mờ đồng bộ
+    // =========================================================================
+    function createKitchenStairPartition(floorBaseY, targetGroup) {
+      const partGroup = new THREE.Group();
+      const stairRearZ = -0.82;
+      const surfY = floorBaseY + 0.25; // f1SurfY = 4.25m
+      const doorW = 0.90;
+      const doorH = 2.20;
+      const doorMidX = -1.25;
+
+      const matGlassFluted = new THREE.MeshPhysicalMaterial({
+        color: 0xf8fafc,
+        roughness: 0.25,
+        transmission: 0.85,
+        thickness: 0.02,
+        transparent: true,
+        opacity: 0.82,
+        ior: 1.5
+      });
+      const matMarblePartition = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.15 });
+      const matCabPartition = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+      const matBrassGold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.25 });
+
+      // 1. VÁCH NHỎ BÊN TRÁI CỬA (từ X0 = -1.725m đến mép cửa -1.70m)
+      const wallLeftLen = Math.abs((doorMidX - doorW / 2) - X0); // 0.025m
+      const wallLeft = createWall(wallLeftLen, 4.0, 0.15, (X0 + doorMidX - doorW / 2) / 2, floorBaseY, stairRearZ, matWallWhite);
+      partGroup.add(wallLeft);
+
+      // 2. LANH TÔ TƯỜNG TRÊN CỬA (từ Y = floorBaseY + doorH = 6.20m đến trần 8.00m)
+      const lintelH = 4.0 - doorH;
+      const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorW, lintelH, 0.15), matWallWhite);
+      lintel.position.set(doorMidX, floorBaseY + doorH + lintelH / 2, stairRearZ);
+      partGroup.add(lintel);
+
+      // 3. CỬA NHÔM KÍNH SLIM KÍNH SỌC ĐỒNG BỘ (rộng 0.90m, cao 2.20m)
+      const dFrame = new THREE.Mesh(new THREE.BoxGeometry(doorW, doorH, 0.16), matMetalBlack);
+      dFrame.position.set(doorMidX, floorBaseY + doorH / 2, stairRearZ);
+
+      const dLeafGroup = new THREE.Group();
+      // Khung cánh nhôm Slim đen
+      const leafW = doorW - 0.06;
+      const leafH = doorH - 0.04;
+      const stileW = 0.045;
+      const stileL = new THREE.Mesh(new THREE.BoxGeometry(stileW, leafH, 0.035), matMetalBlack);
+      stileL.position.set(-leafW / 2 + stileW / 2, 0, 0);
+      const stileR = new THREE.Mesh(new THREE.BoxGeometry(stileW, leafH, 0.035), matMetalBlack);
+      stileR.position.set(leafW / 2 - stileW / 2, 0, 0);
+      const railTop = new THREE.Mesh(new THREE.BoxGeometry(leafW - 2 * stileW, 0.05, 0.035), matMetalBlack);
+      railTop.position.set(0, leafH / 2 - 0.025, 0);
+      const railBot = new THREE.Mesh(new THREE.BoxGeometry(leafW - 2 * stileW, 0.08, 0.035), matMetalBlack);
+      railBot.position.set(0, -leafH / 2 + 0.04, 0);
+      // Kính sọc mờ cánh cửa
+      const glassDoor = new THREE.Mesh(new THREE.BoxGeometry(leafW - 2 * stileW, leafH - 0.13, 0.015), matGlassFluted);
+      glassDoor.position.set(0, 0.015, 0);
+      // Tay nắm dọc dài thanh mảnh màu đen mờ hiện đại
+      const doorHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.60, 8), matMetalBlack);
+      doorHandle.position.set(leafW / 2 - 0.07, 0, 0.03);
+      const doorHandle2 = doorHandle.clone();
+      doorHandle2.position.set(leafW / 2 - 0.07, 0, -0.03);
+      dLeafGroup.add(stileL, stileR, railTop, railBot, glassDoor, doorHandle, doorHandle2);
+      dLeafGroup.position.set(doorMidX + 0.12, floorBaseY + doorH / 2, stairRearZ + 0.05);
+      dLeafGroup.rotation.y = -Math.PI / 8; // Mở hé nhẹ vào bếp
+      partGroup.add(dFrame, dLeafGroup);
+
+      // 4. MẢNG TƯỜNG SAU LƯNG TỦ LẠNH (Góc Đông-Bắc: X = +0.79m -> X1 = +1.725m, rộng 0.935m)
+      const fridgeWallW = X1 - 0.79; // 0.935m
+      const fridgeWallMidX = (0.79 + X1) / 2; // 1.2575m
+      const wallFridge = createWall(fridgeWallW, 4.0, 0.15, fridgeWallMidX, floorBaseY, stairRearZ, matWallWhite);
+      partGroup.add(wallFridge);
+
+      // Ốp lam sóng gỗ sồi mặt hướng ra Cầu Thang (Z = stairRearZ + 0.08m)
+      const slatPanelW = 0.76;
+      const slatPanelH = 2.85;
+      const slatPanelBaseY = surfY;
+      const slatBacking = new THREE.Mesh(new THREE.BoxGeometry(slatPanelW, slatPanelH, 0.015), matWood);
+      slatBacking.position.set(fridgeWallMidX - 0.06, slatPanelBaseY + slatPanelH / 2, stairRearZ + 0.082);
+      partGroup.add(slatBacking);
+
+      // Các thanh lam gỗ sọc dọc
+      const numSlats = 14;
+      const slatW = 0.032;
+      const slatD = 0.022;
+      const slatSpacing = (slatPanelW - numSlats * slatW) / (numSlats - 1);
+      for (let i = 0; i < numSlats; i++) {
+        const slatX = (fridgeWallMidX - 0.06) - slatPanelW / 2 + slatW / 2 + i * (slatW + slatSpacing);
+        const slatMesh = new THREE.Mesh(new THREE.BoxGeometry(slatW, slatPanelH, slatD), matWoodDark);
+        slatMesh.position.set(slatX, slatPanelBaseY + slatPanelH / 2, stairRearZ + 0.082 + 0.012);
+        partGroup.add(slatMesh);
+      }
+
+      // Dải đèn LED dọc ấm áp tạo điểm nhấn viền cầu thang
+      const slatLedStrip = new THREE.Mesh(new THREE.BoxGeometry(0.015, slatPanelH, 0.02), matWarmLedStrip);
+      slatLedStrip.position.set((fridgeWallMidX - 0.06) - slatPanelW / 2 - 0.01, slatPanelBaseY + slatPanelH / 2, stairRearZ + 0.09);
+      partGroup.add(slatLedStrip);
+
+      // 5. MẢNG GIỮA (1.59m: từ X = -0.80m đến X = +0.79m)
+      const midSpanW = 0.79 - (-0.80); // 1.59m
+      const midSpanX = (-0.80 + 0.79) / 2; // -0.005m
+      const kneeWallH = 1.13; // từ floorBaseY (4.0m) đến f1SurfY + 0.88m (5.13m)
+      const kneeWall = createWall(midSpanW, kneeWallH, 0.15, midSpanX, floorBaseY, stairRearZ, matWallWhite);
+      partGroup.add(kneeWall);
+
+      // Gờ bậu tường trên chân tường lửng
+      const wallCap = new THREE.Mesh(new THREE.BoxGeometry(midSpanW, 0.03, 0.18), matWoodDark);
+      wallCap.position.set(midSpanX, floorBaseY + kneeWallH + 0.015, stairRearZ);
+      partGroup.add(wallCap);
+
+      // Lanh tô tường phía trên vách kính (từ Y = 7.00m đến 8.00m)
+      const topLintelH = 1.00;
+      const topLintel = new THREE.Mesh(new THREE.BoxGeometry(midSpanW, topLintelH, 0.15), matWallWhite);
+      topLintel.position.set(midSpanX, floorBaseY + 4.0 - topLintelH / 2, stairRearZ);
+      partGroup.add(topLintel);
+
+      // VÁCH KÍNH SỌC KHUNG SLIM ĐEN (từ Y = 5.16m đến Y = 7.00m, cao 1.84m)
+      const winH = 7.00 - (floorBaseY + kneeWallH + 0.03); // 1.84m
+      const winBaseY = floorBaseY + kneeWallH + 0.03;
+      const winMidY = winBaseY + winH / 2;
+      const frameD = 0.07;
+      const frameThick = 0.035;
+
+      // Khung chu vi
+      const wFrameL = new THREE.Mesh(new THREE.BoxGeometry(frameThick, winH, frameD), matMetalBlack);
+      wFrameL.position.set(midSpanX - midSpanW / 2 + frameThick / 2, winMidY, stairRearZ);
+      const wFrameR = new THREE.Mesh(new THREE.BoxGeometry(frameThick, winH, frameD), matMetalBlack);
+      wFrameR.position.set(midSpanX + midSpanW / 2 - frameThick / 2, winMidY, stairRearZ);
+      const wFrameTop = new THREE.Mesh(new THREE.BoxGeometry(midSpanW, frameThick, frameD), matMetalBlack);
+      wFrameTop.position.set(midSpanX, winBaseY + winH - frameThick / 2, stairRearZ);
+      const wFrameBot = new THREE.Mesh(new THREE.BoxGeometry(midSpanW, frameThick, frameD), matMetalBlack);
+      wFrameBot.position.set(midSpanX, winBaseY + frameThick / 2, stairRearZ);
+
+      // 2 đố đứng chia 3 khoang vách kính
+      const paneW = (midSpanW - 4 * frameThick) / 3; // ~0.483m
+      const mullion1 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, winH - 2 * frameThick, frameD), matMetalBlack);
+      mullion1.position.set(midSpanX - midSpanW / 2 + frameThick + paneW + frameThick / 2, winMidY, stairRearZ);
+      const mullion2 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, winH - 2 * frameThick, frameD), matMetalBlack);
+      mullion2.position.set(midSpanX + midSpanW / 2 - frameThick - paneW - frameThick / 2, winMidY, stairRearZ);
+
+      // 1 đố ngang ngang cốt cửa đi (Y = 6.20m)
+      const transomY = floorBaseY + doorH; // 6.20m
+      const transom = new THREE.Mesh(new THREE.BoxGeometry(midSpanW - 2 * frameThick, frameThick, frameD), matMetalBlack);
+      transom.position.set(midSpanX, transomY, stairRearZ);
+
+      // Các tấm kính sọc fluted glass (3 ô dưới + 3 ô trên)
+      const paneLowH = transomY - (winBaseY + frameThick) - frameThick / 2;
+      const paneTopH = (winBaseY + winH - frameThick) - transomY - frameThick / 2;
+
+      for (let pIdx = 0; pIdx < 3; pIdx++) {
+        const pMidX = (midSpanX - midSpanW / 2 + frameThick + paneW / 2) + pIdx * (paneW + frameThick);
+        // Kính ô dưới
+        const glassLow = new THREE.Mesh(new THREE.BoxGeometry(paneW, paneLowH, 0.015), matGlassFluted);
+        glassLow.position.set(pMidX, winBaseY + frameThick + paneLowH / 2, stairRearZ);
+        // Kính ô trên
+        const glassTop = new THREE.Mesh(new THREE.BoxGeometry(paneW, paneTopH, 0.015), matGlassFluted);
+        glassTop.position.set(pMidX, transomY + frameThick / 2 + paneTopH / 2, stairRearZ);
+        partGroup.add(glassLow, glassTop);
+
+        // Đường gân sọc dọc tạo texture kính fluted
+        for (let rib = -2; rib <= 2; rib++) {
+          const ribLow = new THREE.Mesh(new THREE.BoxGeometry(0.006, paneLowH - 0.02, 0.018), matMetalBlack);
+          ribLow.position.set(pMidX + rib * 0.08, winBaseY + frameThick + paneLowH / 2, stairRearZ);
+          const ribTop = new THREE.Mesh(new THREE.BoxGeometry(0.006, paneTopH - 0.02, 0.018), matMetalBlack);
+          ribTop.position.set(pMidX + rib * 0.08, transomY + frameThick / 2 + paneTopH / 2, stairRearZ);
+          partGroup.add(ribLow, ribTop);
+        }
+      }
+      partGroup.add(wFrameL, wFrameR, wFrameTop, wFrameBot, mullion1, mullion2, transom);
+
+      // 6. QUẦY COFFEE STATION & TỦ PANTRY MẶT BÊN TRONG BẾP (Z = stairRearZ - 0.075 - 0.18 = -1.075m)
+      const pantryGroup = new THREE.Group();
+      const pantryW = 1.48;
+      const pantryD = 0.36;
+      const pantryH = 0.85;
+      const pantryZ = stairRearZ - 0.075 - pantryD / 2; // -0.895 - 0.18 = -1.075m
+
+      // Thùng tủ dưới xám đá phiến
+      const pantryBase = new THREE.Mesh(new THREE.BoxGeometry(pantryW, pantryH, pantryD), matCabPartition);
+      pantryBase.position.set(midSpanX, surfY + pantryH / 2, pantryZ);
+
+      // Mặt đá trắng vân mây
+      const pantryTop = new THREE.Mesh(new THREE.BoxGeometry(pantryW + 0.03, 0.03, pantryD + 0.03), matMarblePartition);
+      pantryTop.position.set(midSpanX, surfY + pantryH + 0.015, pantryZ - 0.01);
+
+      // 3 cặp cánh tủ với tay nắm đồng sang trọng
+      const doorPW = (pantryW - 0.04) / 3;
+      for (let d = 0; d < 3; d++) {
+        const dx = (midSpanX - pantryW / 2 + doorPW / 2 + 0.01) + d * (doorPW + 0.01);
+        const handleP = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.12, 0.015), matBrassGold);
+        handleP.position.set(dx + doorPW * 0.35, surfY + pantryH * 0.72, pantryZ - pantryD / 2 - 0.01);
+        pantryGroup.add(handleP);
+      }
+
+      // Đèn LED hắt ấm dưới mép quầy đá
+      const pantryLed = new THREE.Mesh(new THREE.BoxGeometry(pantryW - 0.04, 0.015, 0.02), matWarmLedStrip);
+      pantryLed.position.set(midSpanX, surfY + pantryH - 0.01, pantryZ - pantryD / 2 + 0.01);
+
+      // Máy pha cà phê Espresso mini
+      const coffeeMachineG = new THREE.Group();
+      const cmBody = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.28, 0.26), matMetalBlack);
+      cmBody.position.set(0, 0.14, 0);
+      const cmTop = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.03, 0.26), new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9 }));
+      cmTop.position.set(0, 0.295, 0);
+      const cmGroupHead = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.05, 12), new THREE.MeshStandardMaterial({ color: 0xe4e4e7, metalness: 0.95 }));
+      cmGroupHead.position.set(0, 0.16, -0.13);
+      const cmHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.11, 8), matWoodDark);
+      cmHandle.rotation.x = Math.PI / 2;
+      cmHandle.position.set(0, 0.16, -0.19);
+      const cmDrip = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.025, 0.12), new THREE.MeshStandardMaterial({ color: 0x71717a, metalness: 0.85 }));
+      cmDrip.position.set(0, 0.015, -0.07);
+      const cmCup = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.022, 0.055, 12), matCeramicWhite);
+      cmCup.position.set(0, 0.055, -0.07);
+      coffeeMachineG.add(cmBody, cmTop, cmGroupHead, cmHandle, cmDrip, cmCup);
+      coffeeMachineG.position.set(midSpanX - 0.42, surfY + pantryH + 0.03, pantryZ);
+
+      // Khay gỗ đựng cốc và hũ đựng hạt cà phê
+      const cupTray = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.018, 0.22), matWood);
+      cupTray.position.set(midSpanX + 0.15, surfY + pantryH + 0.03 + 0.009, pantryZ);
+      const cup1 = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.025, 0.065, 12), matCeramicWhite);
+      cup1.position.set(midSpanX + 0.08, surfY + pantryH + 0.03 + 0.045, pantryZ - 0.04);
+      const cup2 = cup1.clone();
+      cup2.position.set(midSpanX + 0.08, surfY + pantryH + 0.03 + 0.045, pantryZ + 0.04);
+
+      // Hũ hạt cà phê thủy tinh nắp gỗ
+      const jar1 = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.14, 12), matGlass);
+      jar1.position.set(midSpanX + 0.23, surfY + pantryH + 0.03 + 0.07, pantryZ);
+      const jarLid = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.02, 12), matWood);
+      jarLid.position.set(midSpanX + 0.23, surfY + pantryH + 0.03 + 0.15, pantryZ);
+
+      // Bình cắm hoa / decor nhỏ góc quầy
+      const vase = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.18, 12), new THREE.MeshStandardMaterial({ color: 0x0d9488, roughness: 0.2 }));
+      vase.position.set(midSpanX + 0.52, surfY + pantryH + 0.03 + 0.09, pantryZ);
+      const flower = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), new THREE.MeshStandardMaterial({ color: 0xf43f5e }));
+      flower.position.set(midSpanX + 0.52, surfY + pantryH + 0.03 + 0.21, pantryZ);
+
+      pantryGroup.add(pantryBase, pantryTop, pantryLed, coffeeMachineG, cupTray, cup1, cup2, jar1, jarLid, vase, flower);
+      partGroup.add(pantryGroup);
+
+      targetGroup.add(partGroup);
+      return partGroup;
+    }
+
     function createStandardFloorToilet(floorBaseY, targetGroup, slabThickness = 0.25) {
       const wcFloorGroup = new THREE.Group();
       const surfY = floorBaseY + slabThickness;
@@ -2691,11 +2939,11 @@
 
     // =========================================================================
     // KHU VỰC KHOANG PHÍA SAU CẦU THANG LẦU 1:
-    // 1. Bức tường ngăn sau cầu thang tại Z = -0.82m chừa cửa đi thông vào Bếp
+    // 1. Bức tường ngăn sau cầu thang tại Z = -0.82m chừa cửa đi thông vào Bếp (Vách kính sọc Slim + Lam gỗ + Quầy Coffee Pantry)
     // 2. Không gian Phòng Bếp & Bàn ăn gia đình
     // 3. Toilet Lầu 1 (2.0m x 1.2m) ĐỒNG BỘ 100% VỚI TOILET TẦNG TRỆT (đồng trục hộp gen MEP)
     // =========================================================================
-    createStairRearPartition(4.0, f1Furn);
+    createKitchenStairPartition(4.0, f1Furn);
 
     // B. KHÔNG GIAN BẾP & PHÒNG ĂN LẦU 1 (Z: -0.895m -> -3.99m, Cốt mặt sàn f1SurfY = 4.25m)
     // Thiết kế Chữ L tách biệt: Khu Khô/Nấu bên tường phải (Tủ lạnh + Bếp từ) & Khu Ướt quay lưng vào Toilet (Bồn rửa chén + Máy giặt âm bàn đá)
@@ -3416,6 +3664,11 @@
       } else if (view === 'wc') {
         // Góc nhìn trực diện vào Toilet dùng chung tầng trệt (ngang 2.0m x dọc 1.2m) từ hành lang
         resetCameraFocus(new THREE.Vector3(0.725, 1.2, -4.665), new THREE.Vector3(-1.8, 1.7, -4.665));
+      } else if (view === 'partition') {
+        // Góc nhìn trực diện vào Vách kính sọc dọc Slim, Lam gỗ sồi LED và Cửa kính thông Bếp Lầu 1 từ cầu thang
+        if (!floorGroups[1].visible) window.setFloorMode('all');
+        const yOff1p = floorGroups[1].visible ? floorGroups[1].position.y : 0;
+        resetCameraFocus(new THREE.Vector3(0.15, 5.35 + yOff1p, -0.82), new THREE.Vector3(0.0, 5.75 + yOff1p, 1.45));
       } else if (view === 'kitchen') {
         // Góc nhìn trực diện vào Bếp chữ L Lầu 1 (Bồn rửa & Máy giặt quay lưng vào WC, Tủ lạnh & Bếp từ bên phải, Bàn ăn bên trái)
         if (!floorGroups[1].visible) window.setFloorMode('all');
